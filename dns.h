@@ -17,21 +17,21 @@
 
 
     typedef struct {
-                char* dominio;
-                char* IP;
-                }tdomain;
+        char dominio[256];
+        char IP[12];
+    }tdomain;
 
     typedef struct {
-                int tamdato;
-                TAB abDNS;
-                }TDADNS;
+        int tamdato;
+        TAB abDNS;
+    }TDADNS;
 
     typedef struct {
-                int octeto1;
-            	int octeto2;
-            	int octeto3;
-            	int octeto4;
-                }tip;
+        int octeto1;
+        int octeto2;
+        int octeto3;
+        int octeto4;
+    }tip;
 
     /*
     crearDNS
