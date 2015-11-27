@@ -17,20 +17,20 @@
 
 
     typedef struct {
-        char dominio[256];
-        char IP[12];
+        char domain[256];
+        char ip[12];
     }tdomain;
 
     typedef struct {
-        int tamdato;
-        TAB abDNS;
-    }TDADNS;
+        int dataSize;
+        TAB ab;
+    }tdns;
 
     typedef struct {
-        int octeto1;
-        int octeto2;
-        int octeto3;
-        int octeto4;
+        int first;
+        int second;
+        int third;
+        int fourth;
     }tip;
 
     /*
@@ -41,7 +41,7 @@
     asociados a un dominio.
     Postcondiciones : Se inicializa la estructura apuntada por dns.
     */
-    int crearDNS(TDADNS *dns, int tamDato);
+    int createDNS(tdns *dns, int dataSize);
 
     /*
     destruirDNS
@@ -49,7 +49,7 @@
     Precondiciones: dns creado y vacio.
     Postcondiciones: Se destruyó la instancia dns.
     */
-    void destruirDNS(TDADNS *dns);
+    void destroyDNS(tdns *dns);
 
     /*
      Descripcion: Agrega un dominio con un dato asociado.
@@ -58,7 +58,7 @@
     Postcondiciones: Se agregó el domino dominio, y se asocio
     el valor dato.
     */
-    int agregarDominio(TDADNS *dns, char* dominio, void* dato);
+    int addDomain(tdns *dns, char* domain, void* data);
 
     /*
     obtenerValor
@@ -67,7 +67,7 @@
     dns. dato apunta a una variable de tipo T.
     Postcondiciones: Se copió a dato el valor asociado al dominio dominio.
     */
-    void obtenerValor(TDADNS dns, char* dominio, void* dato);
+    void getValue(tdns dns, char* domain, void* data);
 
     /*
     existeDominio
@@ -76,7 +76,7 @@
     Precondiciones: dns creado. dominio es un nombre de dominio válido.
     Postcondiciones: No realiza modificaciones.
     */
-    int existeDominio(TDADNS dns, char* dominio);
+    int domainExists(tdns dns, char* domain);
 
     /*
     eliminarDominio
@@ -85,7 +85,7 @@
     dns.
     Postcondiciones: Se eliminó dominio, y su valor asociado, de dns
     */
-    void eliminarDominio(TDADNS *dns, char* dominio);
+    void deleteDomain(tdns *dns, char* domain);
 
 
 #endif
