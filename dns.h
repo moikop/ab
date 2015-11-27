@@ -19,7 +19,7 @@
     typedef struct {
                 char* dominio;
                 char* IP;
-                }T_elem;
+                }tdomain;
 
     typedef struct {
                 int tamdato;
@@ -31,7 +31,7 @@
             	int octeto2;
             	int octeto3;
             	int octeto4;
-                }T_ip;
+                }tip;
 
     /*
     crearDNS
