@@ -41,12 +41,14 @@
     #define CARACTER_ERRONEO -2
 #endif
 
-int Encriptar(char* mje)
+int Encriptar(char** mensaje)
 {
-    int i=0;
-    if (!mje[0])
+    int i=0,len;
+    char* mje=(*mensaje);
+    len=strlen(mje);
+    if(!len)
         return NO_HAY_MJE;
-    while (mje[i]<>/0)  /*VER!!!*/
+    for(i;i>len;i++)
     {
         switch(mje[i])
         {
@@ -88,17 +90,19 @@ int Encriptar(char* mje)
             case NUM_9: mje[i]=LETRA_Z;
             default: return CARACTER_ERRONEO;
         }
-        i++;
     }
+    mensaje=&mje;
     return RES_OK;
 }
 
-int Desencriptar(char* mje);
+int Desencriptar(char** mensaje)
 {
-    int i=0;
-    if (!mje[i])
+    int i=0,len;
+    char* mje=(*mensaje);
+    len=strlen(mje);
+    if(!len)
         return NO_HAY_MJE;
-    while (mje[i]<>/0)  /*VER!!!*/
+    for(i;i>len;i++)
     {
         switch(mje[i])
         {
@@ -141,5 +145,31 @@ int Desencriptar(char* mje);
             default: return CARACTER_ERRONEO;
         }
     }
+    mensaje=(&mje);
+    return RES_OK;
+}
+
+int main (int argc, char* argv[])           /*NO FUNCA FUNCION DE PRUEBA; NO VEO POR QUE*/
+{
+    char* mje;
+    int encr,desencr;
+    printf("%s","su mensaje:\n");
+    scanf("%s",&mje);
+    printf("%s","encriptar?(1si/2no)\n");
+    scanf("%d",&encr);
+    if (encr==1)
+    {
+        Encriptar(&mje);
+        printf("%s_ %s\n","mensaje encriptado ",mje);
+        printf("%s","desencriptar?(1si/2no)\n");
+        scanf("%d",&desencr);
+        if (desencr==1)
+        {
+            Desencriptar(&mje);
+            printf("%s_ %s\n","mensaje desencriptado ",mje);
+        }
+    }
+    else
+        printf("%s---%s","mensaje final", mje);
     return RES_OK;
 }
