@@ -156,7 +156,7 @@ int AB_Vacio(TAB a)
         return 0;
 }
 
-AB_CanMove(TAB a,const int mov)
+int AB_CanMove(TAB a,const int mov)
 {
     switch (mov)
     {
