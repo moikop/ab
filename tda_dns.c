@@ -1,4 +1,5 @@
 #include "dns.h"
+#include "ab.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -19,7 +20,39 @@ void destroyDNS(tdns *dns) {
     free(dns);
 }
 
-int findDNS(TAB ab, tdomain domain);
+int findDNS(tdns *dns, char *domain, int mov) {
+    int cmp, error;
+    tdomain aux;
+    char *buffer = NULL;
+
+    AB_MoverCte(dns->ab, mov, &error);
+    if(error)
+        return NOT_FOUNDED;
+
+    AB_ElemCte(dns->ab, &aux);
+
+    if (buffer = strtok(domain, ".ar.")) {
+        findDNS(dns->ab, buffer, IZQ);
+    } else if (buffer = strtok(domain, ".com.")) {
+        findDNS(domain, buffer, DER);
+    } else {
+        buffer = strrchr(domain, '.');
+        if (!buffer)
+            return 0;
+        cmp = strcasecmp(buffer, aux.domain);
+        if (cmp < 0) {
+            strncpy(buffer, domain, strlen(domain) - strlen(buffer));
+            findDNS(dns, buffer, IZQ);
+        } else if (cmp > 0) {
+            strncpy(buffer, domain, strlen(domain) - strlen(buffer));
+            findDNS(dns, buffer, DER);
+        } else {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 
 int orderInsert(tdns *dns, tdomain domain);
 
