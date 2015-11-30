@@ -64,7 +64,10 @@ void loadTree(tdns *dns, char *configFile) {
             tmep.ip = strtok(NULL, "");
             if ((!temp.domain) || (!temp.ip))
                 return 0;
-            orderInsert(dns, temp);
+            if (validateDomain(temp)
+                orderInsert(dns, temp);
+            else
+                return 0;
         }
     }
     fclose(cfile);
@@ -75,7 +78,7 @@ int AB_Busqueda(tdns dns, const int mov, char* domain){     /*ver el tipo del mo
     tdomain Aux;
     err=AB_MoverCte(dns->ab, mov, error);
     if(!err)
-        return NOT_FOUNDED;                                     
+        return NOT_FOUNDED;
     AB_ElemCte(dns->ab,&Aux);
     if(doamin==Aux.domain)
         return FOUNDED;                                    /*DEFINE*/
