@@ -27,7 +27,7 @@ int findDNS(tdns *dns, char *domain, int mov) {
 
     AB_MoverCte(dns->ab, mov, &error);
     if(error)
-        return NOT_FOUNDED;
+        return -1;
 
     AB_ElemCte(dns->ab, &aux);
 
@@ -53,8 +53,24 @@ int findDNS(tdns *dns, char *domain, int mov) {
     return 0;
 }
 
+int orderInsert(tdns *dns, tdomain domain) {
+    int error;
+    tdomain aux;
+    char *buffer = NULL;
+    int search = findDNS(dns, domain.domain, RAIZ);
 
-int orderInsert(tdns *dns, tdomain domain);
+    if (search < 0) {
+        AB_ElemCte(dns->ab, &aux);
+        buffer = strtok(domain.domain, ".");
+        if (strcasecmp(buffer, aux.domain) > 0)
+            AB_Insertar(dns->ab, DER, &domain, &error);
+        else
+            AB_Insertar(dns->ab, IZQ, &domain, &error);
+    } else {
+        return 0;
+    }
+    return 1;
+}
 
 int validateIP(int ip) {
     if ((ip > 0) && (ip <= 255))
@@ -87,7 +103,7 @@ int validateDomain(tdomain domain) {
 void loadTree(tdns *dns, char *configFile) {
     FILE *cfile;
     tdomain temp;
-    char *line[MAX_LINE];
+    char line[MAX_LINE];
 
     cfile = fopen(configFile, "r");
 
