@@ -15,6 +15,7 @@
 
     #include "ab.h"
 
+    #define MAX_LINE 270
 
     typedef struct {
         char domain[256];
