@@ -19,7 +19,7 @@
 
     typedef struct {
         char domain[256];
-        char ip[12];
+        char ip[12];             /* POR QUE NO ES DEL TIPO tip?*/
     }tdomain;
 
     typedef struct {
