@@ -33,6 +33,8 @@
     int AB_Vacio(TAB a);
 
     void AB_Insertar(TAB *a,int mov,void *elem,int *error);
+    
+    int AB_CanMove(TAB a,const int mov);
 
 #endif
 
