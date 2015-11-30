@@ -155,3 +155,25 @@ int AB_Vacio(TAB a)
     else
         return 0;
 }
+
+AB_CanMove(TAB a,const int mov)
+{
+    switch (mov)
+    {
+        case DER:if(!(a.cte->der))
+                    return FALSE;
+                else
+                    return TRUE;
+        case IZQ:if(!(a.cte->izq))
+                    return FALSE;
+                else
+                    return TRUE;
+    
+        case RAIZ:if(!a.raiz)
+                    return FALSE;
+                else
+                    return TRUE;
+    
+        default: return FALSE;
+    }
+}
