@@ -8,4 +8,4 @@ void log(FILE *logf, char *cmd, char* srcurl, char* srcip, char* dsturl, char* d
     fprintf(logf, "%s %s %s %s %s %s %s %s\n", asctime(time), cmd, srcurl, srcip, dsturl, dstip, msg, encrypted);
 }
 
-#endif // LOGGER_H_INCLUDED
+#endif
