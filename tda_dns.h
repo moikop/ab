@@ -1,4 +1,4 @@
-#ifndef
+#ifndef __DNS_H__
     #define __DNS_H__
 
     #if !defined(NULL)
@@ -43,7 +43,8 @@
     asociados a un dominio.
     Postcondiciones : Se inicializa la estructura apuntada por dns.
     */
-    int createDNS(tdns *dns, int dataSize);
+
+    int createDNS(tdns *dns, int dataSize);
 
     /*
     destruirDNS
@@ -51,7 +52,7 @@
     Precondiciones: dns creado y vacio.
     Postcondiciones: Se destruyó la instancia dns.
     */
-    void destroyDNS(tdns *dns);
+    void destroyDNS(tdns *dns);
 
     /*
      Descripcion: Agrega un dominio con un dato asociado.
@@ -60,7 +61,7 @@
     Postcondiciones: Se agregó el domino dominio, y se asocio
     el valor dato.
     */
-    int addDomain(tdns *dns, char* domain, void* data);
+    int addDomain(tdns *dns, char* domain, void* data);
 
     /*
     obtenerValor
@@ -69,7 +70,7 @@
     dns. dato apunta a una variable de tipo T.
     Postcondiciones: Se copió a dato el valor asociado al dominio dominio.
     */
-    void getValue(tdns dns, char* domain, void* data);
+    void getValue(tdns dns, char* domain, void* data);
 
     /*
     existeDominio
@@ -78,7 +79,7 @@
     Precondiciones: dns creado. dominio es un nombre de dominio válido.
     Postcondiciones: No realiza modificaciones.
     */
-    int domainExists(tdns dns, char* domain);
+    int domainExists(tdns dns, char* domain);
 
     /*
     eliminarDominio
@@ -87,7 +88,7 @@
     dns.
     Postcondiciones: Se eliminó dominio, y su valor asociado, de dns
     */
-    void deleteDomain(tdns *dns, char* domain);
+    void deleteDomain(tdns *dns, char* domain);
 
 
 #endif

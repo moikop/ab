@@ -1,4 +1,5 @@
 #include "ab.h"
+#include "tda_dns.h"
 #include <memory.h>
 
 void AB_Crear(TAB *a,int tdato)
@@ -8,14 +9,23 @@ void AB_Crear(TAB *a,int tdato)
     a->cte = NULL;
 }
 
+void AB_Copy(tdomain *dst, tdomain *src) {
+    if (src->domain)
+        strcpy(dst->domain, src->domain);
+    if (src->ip)
+        strcpy(dst->ip, src->ip);
+    if (src->subab)
+        memcpy(dst->subab, src->subab, sizeof(TAB));
+}
+
 void AB_ElemCte(TAB a,void *elem)
 {
-    memcpy(elem,a.cte->elem,a.tamdato);
+    AB_Copy(elem, a.cte->elem);
 }
 
 void AB_ModifCte(TAB *a,void *elem)
 {
-    memcpy(a->cte->elem,elem,a->tamdato);
+    AB_Copy(a->cte->elem, elem);
 }
 
 TNodoAB* BuscarPadre(TNodoAB *padre,TNodoAB *hijo)     /*FUNCION INTERNA*/
@@ -168,12 +178,12 @@ int AB_CanMove(TAB a,const int mov)
                     return FALSE;
                 else
                     return TRUE;
-    
+
         case RAIZ:if(!a.raiz)
                     return FALSE;
                 else
                     return TRUE;
-    
+
         default: return FALSE;
     }
 }
