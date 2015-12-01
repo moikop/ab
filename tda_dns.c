@@ -148,6 +148,6 @@ void getValue(tdns dns, char* domain, void* data){
 }
 
 int domainExists(tdns dns, char* domain){
-    return findDomain(dns, raiz, domain);
+    return findDomain(dns, RAIZ, domain);
 }
 
