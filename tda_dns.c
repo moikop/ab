@@ -122,7 +122,7 @@ void loadTree(tdns *dns, char *configFile) {
     fclose(cfile);
 }
 
-int AB_Busqueda(tdns dns, const int mov, char* domain){     /*ver el tipo del movimiento*/
+int findDomain(tdns dns, const int mov, char* domain){     /*ver el tipo del movimiento*/
     int err, cmp, *error;
     tdomain Aux;
     err=AB_MoverCte(dns->ab, mov, error);
@@ -132,9 +132,9 @@ int AB_Busqueda(tdns dns, const int mov, char* domain){     /*ver el tipo del mo
     if(doamin==Aux.domain)
         return FOUNDED;                                    /*DEFINE*/
     if(AB_CanMove(dns->ab,DER))
-        return AB_Busqueda(dns, DER, domain);
+        return findDomain(dns, DER, domain);
     if(AB_CanMove(dns->ab,IZQ))                            /*VER SI ESTA BIEN HACER UNA PRIMITIVA PARA ESTO EN TDA AB*/
-        return AB_Busqueda(dns, IZQ, domain);
+        return findDomain(dns, IZQ, domain);
 }
 
 void getValue(tdns dns, char* domain, void* data){
@@ -148,6 +148,6 @@ void getValue(tdns dns, char* domain, void* data){
 }
 
 int domainExists(tdns dns, char* domain){
-    return AB_Busqueda(dns, raiz, domain);
+    return findDomain(dns, raiz, domain);
 }
 
