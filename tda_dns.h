@@ -20,7 +20,8 @@
     typedef struct {
         char domain[256];
         char ip[12];
-        TAB *subab;
+        TAB subab;
+        char displacement;
     }tdomain;
 
     typedef struct {
