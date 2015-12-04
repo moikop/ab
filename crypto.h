@@ -4,26 +4,26 @@
 #include <time.h>
 
 #define CRYPTO_DIR "./crypto/"
-#define MAX_DISPLACEMENT 20
+#define MAX_OFFSET 20
 
-void encryptMsg(char *msg, char displacement) {
+void encryptMsg(char *msg, char offset) {
     int i;
 
     for (i = 0; i < strlen(msg); i++)
-        msg[i] += displacement;
+        msg[i] += offset;
 }
 
-void decryptMsg(char *msg, char displacement) {
+void decryptMsg(char *msg, char offset) {
     int i;
 
     for (i = 0; i < strlen(msg); i++)
-        msg[i] -= displacement;
+        msg[i] -= offset;
 }
 
-int generateDisplacement(char *domain) {
+int generateoffset(char *domain) {
     FILE *crypto;
     char *fpath = NULL;
-    char displacement = 0;
+    char offset = 0;
 
     fpath = malloc(sizeof(char) * (strlen(domain) + strlen(CRYPTO_DIR)));
     if (!fpath) return 0;
@@ -35,16 +35,16 @@ int generateDisplacement(char *domain) {
     if (!crypto) return 0;
 
     srand(time(NULL));
-    displacement = (rand() % MAX_DISPLACEMENT) + 1;
+    offset = (rand() % MAX_OFFSET) + 1;
 
-    fprintf(crypto, "%c", displacement);
+    fprintf(crypto, "%c", offset);
     fclose(crypto);
 
     free(fpath);
     return 1;
 }
 
-char getDisplacement(char *domain) {
+char getoffset(char *domain) {
     FILE *crypto;
     char *fpath = NULL;
     char line[5];

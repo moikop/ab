@@ -21,7 +21,7 @@
         char domain[256];
         char ip[12];
         TAB subab;
-        char displacement;
+        char offset;
     }tdomain;
 
     typedef struct {
