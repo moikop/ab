@@ -20,7 +20,7 @@ void decryptMsg(char *msg, char offset) {
         msg[i] -= offset;
 }
 
-int generateoffset(char *domain) {
+int genoffset(char *domain) {
     FILE *crypto;
     char *fpath = NULL;
     char offset = 0;
