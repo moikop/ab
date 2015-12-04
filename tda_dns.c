@@ -32,36 +32,33 @@ void destroyDNS(tdns *dns) {
     free(dns);
 }
 
-int findDNS(tdns *dns, char *domain, int mov) {
-    int cmp, error;
+int findDNS(TAB *tree, TPila *domain, char *name, int mov) {
+    int res = 0;
     tdomain aux;
-    char *buffer = NULL;
 
-    AB_MoverCte(dns->ab, mov, &error);
-    if(error)
-        return -1;
+    if (AB_Vacio(*tree)) return 0;
 
-    AB_ElemCte(dns->ab, &aux);
+    AB_MoverCte(tree, mov);
+    AB_ElemCte(*tree, &aux);
 
-    if (buffer = strtok(domain, ".ar.")) {
-        findDNS(dns->ab, buffer, IZQ);
-    } else if (buffer = strtok(domain, ".com.")) {
-        findDNS(domain, buffer, DER);
+    if ((!name) || strcmp(name, "") == 0 )
+        P_Sacar(domain, name);
+
+    res = strcasecmp(aux.domain, name);
+
+    if (res < 0) {
+        findDNS(tree, domain, name, DER);
+    } else if (res > 0) {
+        findDNS(tree, domain, name, IZQ);
     } else {
-        buffer = strrchr(domain, '.');
-        if (!buffer)
-            return 0;
-        cmp = strcasecmp(buffer, aux.domain);
-        if (cmp < 0) {
-            strncpy(buffer, domain, strlen(domain) - strlen(buffer));
-            findDNS(dns, buffer, IZQ);
-        } else if (cmp > 0) {
-            strncpy(buffer, domain, strlen(domain) - strlen(buffer));
-            findDNS(dns, buffer, DER);
-        } else {
+        if (P_Vacia(*domain)) {
             return 1;
+        } else {
+            P_Sacar(domain, name);
+            findDNS(aux.subab, domain, name, RAIZ);
         }
     }
+
     return 0;
 }
 
