@@ -5,6 +5,22 @@
 #include <string.h>
 #include <ctype.h>
 
+#define ARGS_DNS_SEND 6
+#define ARGS_DNS_GET_IP 5
+#define ARGS_DNS_ADD_DOMAIN 5
+#define ARGS_DNS_DELETE_DOMAIN 4
+#define DOMAIN_NAME_MAX 255
+#define DOMAIN_TAG_MAX 63
+#define DASH -
+#define DOT .
+#define PATTERN_ALL_DOMAINS "^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)*[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?$"
+#define PATTERN_IP "/([0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])(\.){3}([0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])/"
+
+#define RES_OK 0
+#define RES_ERROR 1
+#define RES_MEM_ERROR -1
+
+
 int createDNS(tdns *dns, int dataSize) {
     AB_Crear(&(dns->ab), dataSize);
     dns->dataSize = dataSize;
@@ -68,33 +84,75 @@ int orderInsert(tdns *dns, tdomain domain) {
     return 1;
 }
 
-int validateIP(int ip) {
-    if ((ip > 0) && (ip <= 255))
-        return 1;
-    return 0;
+int validateOctect(long ip) {
+    if ((ip >= 0) && (ip <= 255))
+        return RES_OK;
+    return RES_ERROR;
 }
 
-int validateDomain(tdomain domain) {
-    tip temp_ip;
+int validateIP(char* ip) {
+
+    char* token;
+    char* ptr;
+    long aux;
     int i = 0;
 
-    temp_ip.first = strtol(strtok(domain.ip, "."), NULL, 10);
-    temp_ip.second = strtol(strtok(NULL, "."), NULL, 10);
-    temp_ip.third = strtol(strtok(NULL, "."), NULL, 10);
-    temp_ip.fourth = strtol(strtok(NULL, "."), NULL, 10);
+    token = strtok(ip,DOT);
+    if(!token) return RES_ERROR;
 
-    if ((!validateIP(temp_ip.first)) || (!validateIP(temp_ip.second)) || (!validateIP(temp_ip.third)) || (!validateIP(temp_ip.fourth)))
-        return 0;
+    /*validación de los octetos de la dirección ip*/
+    while(token!=NULL) {
+        i++;
+        aux = strtol(token,&ptr,10);
+        if(validateOctect(aux)!=RES_OK)
+            return RES_ERROR;
+        token = strtok(NULL,DOT);
+    }
+    if(i!=4) return RES_ERROR;
 
-    for (i = 0; i < strlen(domain.domain); i++) {
-        if ((isalpha(domain.domain[i]) || (strcmp(domain.domain[i], ".") == 0))
-            continue;
-        else
-            return 0;
+    return RES_OK;
+}
+
+int validateURL(char* url) {
+
+    int i = 0;
+    int length = 0;
+    int tag_length = 0;
+    char* token;
+    char s[2];
+    char e[2];
+    char ti[2];
+
+    token = strtok(url,DOT);
+    if(!token) return RES_ERROR;
+
+    s[1] = '\0';e[1] = '\0';ti[1] = '\0';
+
+    /*validación del dominio*/
+    while(token!=NULL) {
+        tag_length = strlen(token);
+        length += tag_length;
+        s[0] = token[0];
+        e[0] = token[tag_length-1];
+
+        if(tag_length>DOMAIN_TAG_MAX) return RES_ERROR;
+        if((strcmp(s,DASH)==0)||(strcmp(e,DASH)==0)) return RES_ERROR;
+
+        for(i=0;i<tag_length;i++) {
+            ti[0] = token[i];
+            if((isalpha((int)ti)!=0)||(isdigit((int)ti)!=0)||(strcmp(ti,DASH)==0))
+                return RES_ERROR;
+        }
+        token = strtok(NULL,DOT);
     }
 
-    return 1;
+    if(length>DOMAIN_NAME_MAX)
+        return RES_ERROR;
+
+    return RES_OK;
 }
+
+
 
 void loadTree(tdns *dns, char *configFile) {
     FILE *cfile;
