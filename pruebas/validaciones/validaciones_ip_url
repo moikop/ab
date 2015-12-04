@@ -1,0 +1,106 @@
+#include <string.h>
+#include <ctype.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+#define DOMAIN_NAME_MAX 255
+#define DOMAIN_TAG_MAX 63
+#define DASH "-"
+#define DOT "."
+
+#define RES_OK 0
+#define RES_ERROR 1
+#define RES_MEM_ERROR -1
+
+
+int validateOctect(long ip) {
+    if ((ip >= 0) && (ip <= 255))
+        return RES_OK;
+    return RES_ERROR;
+}
+
+int validateIP(char* ip) {
+
+    char* token;
+    char* ptr;
+    long aux;
+    int i = 0;
+
+    token = strtok(ip,DOT);
+    if(!token) return RES_ERROR;
+
+    /*validación de los octetos de la dirección ip*/
+    while(token!=NULL) {
+        i++;
+        aux = strtol(token,&ptr,10);
+        if(validateOctect(aux)!=RES_OK)
+            return RES_ERROR;
+        token = strtok(NULL,DOT);
+    }
+    if(i!=4) return RES_ERROR;
+
+    return RES_OK;
+}
+
+int validateURL(char* url) {
+
+    int i = 0;
+    int length = 0;
+    int tag_length = 0;
+    char* token;
+    char s[2];
+    char e[2];
+    char ti[2];
+
+    token = strtok(url,DOT);
+    if(!token) { printf("Empty url.\n");return RES_ERROR;}
+
+    s[1] = '\0';e[1] = '\0';ti[1] = '\0';
+
+    /*validación del dominio*/
+    while(token!=NULL) {
+        tag_length = strlen(token);
+        length += tag_length;
+        s[0] = token[0];
+        e[0] = token[tag_length-1];
+
+        if(tag_length>DOMAIN_TAG_MAX) { printf("To big tag.\n");return RES_ERROR;}
+        if((strcmp(s,DASH)==0)||(strcmp(e,DASH)==0)) { printf("Starts or ends with -.\n");return RES_ERROR;}
+
+        for(i=0;i<tag_length;i++) {
+            ti[0] = token[i];
+            printf("symbol: %s\n",ti);
+            if((isalpha((int)ti)!=0)||(isdigit((int)ti)!=0)||(strcmp(ti,DASH)==0)){
+                printf("Wrong symbols.\n");
+                return RES_ERROR;
+            }
+        }
+        token = strtok(NULL,DOT);
+    }
+
+    if(length>DOMAIN_NAME_MAX) {
+        printf("To big url.\n");
+        return RES_ERROR;
+    }
+
+    return RES_OK;
+}
+
+
+int main(int argc,char** argv) {
+
+    char URL[300] = "www.google.com.ar";
+    char IP[20] = "180.166.130.121";
+    int octect = 255;
+
+    if(validateURL(URL)!=RES_OK) printf("no es url valida.\n");
+    else printf("es url valida.\n");
+
+    if(validateOctect(octect)!=RES_OK) printf("no es octeto valido.\n");
+    else printf("es octeto valido.\n");
+
+    if(validateIP(IP)!=RES_OK) printf("no es ip valida.\n");
+    else printf("es ip valida.\n");
+
+    return RES_OK;
+}
