@@ -11,9 +11,11 @@
 #define ARGS_DNS_DELETE_DOMAIN 4
 #define DOMAIN_NAME_MAX 255
 #define DOMAIN_TAG_MAX 63
-#define DASH -
-#define DOT .
-
+#define DASH "-"
+#define DOT "."
+#define MAX_LINE 300
+#define FOUNDED 256
+#define NOT_FOUNDED 255
 #define RES_OK 0
 #define RES_ERROR 1
 #define RES_MEM_ERROR -1
@@ -85,17 +87,14 @@ void loadTree(tdns *dns, char *configFile) {
     char line[MAX_LINE];
 
     cfile = fopen(configFile, "r");
+    if(!cfile) return RES_ERROR;
 
     while(!feof(cfile)) {
         if (fgets(linea, MAX_LINE-1, cfile)) {
-            temp.domain = strtok(line, " ");
-            tmep.ip = strtok(NULL, "");
-            if ((!temp.domain) || (!temp.ip))
-                return 0;
-            if (validateDomain(temp)
-                orderInsert(dns, temp);
-            else
-                return 0;
+            temp.domain = strtok(line," ");
+            temp.ip = strtok(NULL,"");
+            if(validateURL(temp.domain)!=RES_OK && validateIP(temp.ip)!=RES_OK) return RES_ERROR;
+            /*TODO función que llama a la carga en el arbol*/
         }
     }
     fclose(cfile);
@@ -108,7 +107,7 @@ int findDomain(tdns dns, const int mov, char* domain){     /*ver el tipo del mov
     if(!err)
         return NOT_FOUNDED;
     AB_ElemCte(dns->ab,&Aux);
-    if(doamin==Aux.domain)
+    if(strcmp(domain,Aux.domain)==0)
         return FOUNDED;                                    /*DEFINE*/
     if(AB_CanMove(dns->ab,DER))
         return findDomain(dns, DER, domain);
