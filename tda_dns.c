@@ -129,6 +129,46 @@ int domainExists(tdns dns, char* domain){
     return findDomain(dns, RAIZ, domain);
 }
 
+int agregarDominio(tdns* dns,tdomain* td) {
+
+    TPila pila_dominio;
+    int error;
+    /*TODO parsear tdomain.dominio y guardarlo en la pila*/
+    /*ahora con el dominio en la pila, voy a agregando los subdominios*/
+
+    /*TODO agregarSubDominio(TABO* a,tdomain* d,TPila pila,int* error)*/
+    return error;
+}
+
+int agregarSubDominio(TAB* a,tdomain* d,TPila pila,int* error) {
+
+    char* subdominio;
+    tdomain domain;
+    if(P_Vacia(pila)) {*error = RES_OK;return *error}
+
+    subdominio = (char*)malloc(sizeof(char)*DOMAIN_TAG_MAX+1);
+    if(!subdominio) return RES_MEM_ERROR;
+
+    if(P_Sacar(&pila,subdominio) && P_Vacia(pila)) {
+    /*ultima iteración, estamos en la hoja*/
+    /*hay que inicializar un tdomain con : el nombre del subdominio, la ip correspondiente a la url completa, un árbol vacío, y el diccionario de encriptación*/
+        echo "ultima iteración, estamos en la hoja\n";
+        ABO_Insertar(a,&domain,error);
+        return *error;
+    }
+
+    /*a esta altura ya saqué un elemento de la pila*/
+
+    /*hay que inicializar un tdomain con: el nombre del subdominio, sin ip, crearle un árbol, y sin diccionario de encriptación*/
+
+    echo "en plena iteración\n";
+
+    ABO_Insertar(a,&domain,error);
+
+    return *error;
+}
+
+
 /***********Funciones de validacion*************/
 
 void showHelp(char* name)
