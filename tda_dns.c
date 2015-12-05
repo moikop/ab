@@ -13,8 +13,6 @@
 #define DOMAIN_TAG_MAX 63
 #define DASH -
 #define DOT .
-#define PATTERN_ALL_DOMAINS "^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)*[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?$"
-#define PATTERN_IP "/([0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])(\.){3}([0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])/"
 
 #define RES_OK 0
 #define RES_ERROR 1
@@ -79,6 +77,69 @@ int orderInsert(tdns *dns, tdomain domain) {
         return 0;
     }
     return 1;
+}
+
+void loadTree(tdns *dns, char *configFile) {
+    FILE *cfile;
+    tdomain temp;
+    char line[MAX_LINE];
+
+    cfile = fopen(configFile, "r");
+
+    while(!feof(cfile)) {
+        if (fgets(linea, MAX_LINE-1, cfile)) {
+            temp.domain = strtok(line, " ");
+            tmep.ip = strtok(NULL, "");
+            if ((!temp.domain) || (!temp.ip))
+                return 0;
+            if (validateDomain(temp)
+                orderInsert(dns, temp);
+            else
+                return 0;
+        }
+    }
+    fclose(cfile);
+}
+
+int findDomain(tdns dns, const int mov, char* domain){     /*ver el tipo del movimiento*/
+    int err, cmp, *error;
+    tdomain Aux;
+    err=AB_MoverCte(dns->ab, mov, error);
+    if(!err)
+        return NOT_FOUNDED;
+    AB_ElemCte(dns->ab,&Aux);
+    if(doamin==Aux.domain)
+        return FOUNDED;                                    /*DEFINE*/
+    if(AB_CanMove(dns->ab,DER))
+        return findDomain(dns, DER, domain);
+    if(AB_CanMove(dns->ab,IZQ))                            /*VER SI ESTA BIEN HACER UNA PRIMITIVA PARA ESTO EN TDA AB*/
+        return findDomain(dns, IZQ, domain);
+}
+
+void getValue(tdns dns, char* domain, void* data){
+    tdomain Aux;
+    if(AB_Vacio(dns->ab))
+        return NO_DATA;              /*DEFINE*/
+    AB_ElemCte(dns->ab,&Aux);
+    domain=Aux.domain;
+    (char*)data=Aux.ip;             /*VER SI SE PUEDE CASTEAR ARGUMENTO Y EL TIPO DE AUX:IP*/
+    return RES_OK;
+}
+
+int domainExists(tdns dns, char* domain){
+    return findDomain(dns, RAIZ, domain);
+}
+
+/***********Funciones de validacion*************/
+
+void showHelp(char* name)
+{
+    printf("Este programa simula un arbol de dns limitado, y permite simular el envío de mensajes encriptados entre dominios pertenecientes al arbol.\n");
+    printf("Uso:\n");
+    printf("Muestra en pantalla el mensaje encriptado:\n %s -dnsSend [urlOrigen] [urlDestino] [mensaje] [archivo.log]",name);
+    printf("Muestra en pantalla los datos de la IP Origen y Destino:\n %s -dnsGetIP [urlOrigen] [urlDestino] [archivo.log]",name);
+    printf("Muestra en pantalla el dominio e IP agregados:\n %s -dnsAddDomain [url] [IP] [archivo.log]",name);
+    printf("Muestra en pantalla el dominio e IP eliminados:\n %s -dnsDeleteDomain [url] [archivo.log]",name);
 }
 
 int validateOctect(long ip) {
@@ -149,56 +210,20 @@ int validateURL(char* url) {
     return RES_OK;
 }
 
+int validateInput(int argc, char** argv, char** cmd) {
 
-
-void loadTree(tdns *dns, char *configFile) {
-    FILE *cfile;
-    tdomain temp;
-    char line[MAX_LINE];
-
-    cfile = fopen(configFile, "r");
-
-    while(!feof(cfile)) {
-        if (fgets(linea, MAX_LINE-1, cfile)) {
-            temp.domain = strtok(line, " ");
-            tmep.ip = strtok(NULL, "");
-            if ((!temp.domain) || (!temp.ip))
-                return 0;
-            if (validateDomain(temp)
-                orderInsert(dns, temp);
-            else
-                return 0;
-        }
+    if (strcmp(argv[1], CMD_SEND)==0 && argc==ARGS_DNS_SEND && validateURL(argv[2])==RES_OK && validateURL(argv[3])==RES_OK) {
+        strncpy(*cmd,CMD_SEND,sizeof(CMD_SEND));
+    } else if (strcmp(argv[1],CMD_GETIP)==0 && argc==ARGS_DNS_GET_IP && validateURL(argv[2])==RES_OK && validateURL(argv[3])==RES_OK) {
+        strncpy(*cmd,CMD_GETIP,sizeof(CMD_GETIP));
+    } else if (strcmp(argv[1],CMD_ADDDOMAIN)==0 && argc==ARGS_DNS_ADD_DOMAIN && validateURL(argv[2])==RES_OK && validateIP(argv[3])==RES_OK) {
+        strncpy(*cmd,CMD_ADDDOMAIN,sizeof(CMD_ADDDOMAIN));
+    } else if (strcmp(argv[1],CMD_DELETEDOMAIN)==0 && argc==ARGS_DNS_DELETE_DOMAIN && validateURL(argv[2])==RES_OK) {
+        strncpy(*cmd,CMD_DELETEDOMAIN,sizeof(CMD_DELETEDOMAIN));
+    } else {
+        return RES_ERROR;
     }
-    fclose(cfile);
-}
-
-int findDomain(tdns dns, const int mov, char* domain){     /*ver el tipo del movimiento*/
-    int err, cmp, *error;
-    tdomain Aux;
-    err=AB_MoverCte(dns->ab, mov, error);
-    if(!err)
-        return NOT_FOUNDED;
-    AB_ElemCte(dns->ab,&Aux);
-    if(doamin==Aux.domain)
-        return FOUNDED;                                    /*DEFINE*/
-    if(AB_CanMove(dns->ab,DER))
-        return findDomain(dns, DER, domain);
-    if(AB_CanMove(dns->ab,IZQ))                            /*VER SI ESTA BIEN HACER UNA PRIMITIVA PARA ESTO EN TDA AB*/
-        return findDomain(dns, IZQ, domain);
-}
-
-void getValue(tdns dns, char* domain, void* data){
-    tdomain Aux;
-    if(AB_Vacio(dns->ab))
-        return NO_DATA;              /*DEFINE*/
-    AB_ElemCte(dns->ab,&Aux);
-    domain=Aux.domain;
-    (char*)data=Aux.ip;             /*VER SI SE PUEDE CASTEAR ARGUMENTO Y EL TIPO DE AUX:IP*/
     return RES_OK;
 }
 
-int domainExists(tdns dns, char* domain){
-    return findDomain(dns, RAIZ, domain);
-}
-
+/************************************************************/
