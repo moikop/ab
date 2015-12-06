@@ -62,39 +62,70 @@ int findDNS(TAB *tree, TPila *domain, char *name, int mov) {
     return 0;
 }
 
-int orderInsert(tdns *dns, tdomain domain) {
+int orderInsert(TAB *tree, tdomain domain) {
     int error;
     tdomain aux;
     char *buffer = NULL;
-    int search = findDNS(dns, domain.domain, RAIZ);
+    char *name = malloc(sizeof(char) * 64);
+    int search = 0;
 
-    if (search < 0) {
-        AB_ElemCte(dns->ab, &aux);
+    if (!name) return 0;
+
+    search = findDNS(tree, domain.domain, name, RAIZ);
+    free(name);
+
+    if (!search) {
+        AB_ElemCte(tree, &aux);
         buffer = strtok(domain.domain, ".");
         if (strcasecmp(buffer, aux.domain) > 0)
-            AB_Insertar(dns->ab, DER, &domain, &error);
+            AB_Insertar(tree, DER, &domain, &error);
         else
-            AB_Insertar(dns->ab, IZQ, &domain, &error);
+            AB_Insertar(tree, IZQ, &domain, &error);
     } else {
         return 0;
     }
     return 1;
 }
 
+void breakDomain(char *domain, TPila *pile) {
+    char *pointer = NULL;
+    char buffer[64];
+
+    P_Crear(pile, sizeof(char) * 64);
+    pointer = strtok(domain, ".")
+
+    while (pointer) {
+        strcpy(buffer, pointer);
+        P_Agregar(pile, buffer);
+        pointer = strtok(NULL, ".");
+    }
+}
+
+void loadDomain(tdns *dns, TPila *domain) {
+    orderInsert(dns->ab, domain);
+}
+
 void loadTree(tdns *dns, char *configFile) {
     FILE *cfile;
-    tdomain temp;
     char line[MAX_LINE];
+    char IP[14];
+    char url[64];
+    char *buffer;
+    TPila domain;
 
     cfile = fopen(configFile, "r");
     if(!cfile) return RES_ERROR;
 
     while(!feof(cfile)) {
-        if (fgets(linea, MAX_LINE-1, cfile)) {
-            temp.domain = strtok(line," ");
-            temp.ip = strtok(NULL,"");
-            if(validateURL(temp.domain)!=RES_OK && validateIP(temp.ip)!=RES_OK) return RES_ERROR;
-            /*TODO función que llama a la carga en el arbol*/
+        if (fgets(line, MAX_LINE-1, cfile)) {
+            buffer = strtok(line, " ");
+            strncpy(url, buffer, 64);
+            buffer = strtok(NULL, " ");
+            strncpy(IP, buffer, 14);
+            if (validateInput(url, IP)) {
+                breakDomain(url, &domain);
+                loadDomain(dns, &domain);
+            }
         }
     }
     fclose(cfile);
@@ -249,6 +280,7 @@ int validateURL(char* url) {
     return RES_OK;
 }
 
+/*
 int validateInput(int argc, char** argv, char** cmd) {
 
     if (strcmp(argv[1], CMD_SEND)==0 && argc==ARGS_DNS_SEND && validateURL(argv[2])==RES_OK && validateURL(argv[3])==RES_OK) {
@@ -264,5 +296,5 @@ int validateInput(int argc, char** argv, char** cmd) {
     }
     return RES_OK;
 }
-
+*/
 /************************************************************/
