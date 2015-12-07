@@ -68,25 +68,18 @@ int orderInsert(TAB *tree, tdomain domain) {
     tdomain aux;
     char *buffer = NULL;
     int search = 0;
-    char *name;
 
-    name = malloc(sizeof(char) * DOMAIN_TAG_MAX);
-    if (!name) return RES_MEM_ERROR;
-
-    search = findDNS(tree, domain.domain, name, RAIZ);
-    free(name);
+    search = findDomain(tree,RAIZ,domain.domain);
 
     if (!search) {
         AB_ElemCte(tree, &aux);
-        buffer = strtok(domain.domain, ".");
-        if (strcasecmp(buffer, aux.domain) > 0)
+        if (strcasecmp(domain.domain, aux.domain) > 0)
             AB_Insertar(tree, DER, &domain, &error);
         else
             AB_Insertar(tree, IZQ, &domain, &error);
-    } else {
-        return 0;
-    }
-    return 1;
+        return RES_OK;
+    } else
+        return RES_ERROR;
 }
 
 void breakDomain(char *domain, TPila *pile) {
@@ -103,7 +96,7 @@ void breakDomain(char *domain, TPila *pile) {
 }
 
 void loadDomain(tdns *dns, TPila *domain) {
-    orderInsert(dns->ab, domain);
+    orderInsert(&(dns->ab), domain);
 }
 
 void loadTree(tdns *dns, char *configFile) {
@@ -111,7 +104,7 @@ void loadTree(tdns *dns, char *configFile) {
     tdomain temp;
     char* buffer;
     char line[MAX_LINE];
-    char IP[IP_MAX];
+    char Ipa[IP_MAX];
     char url[DOMAIN_TAG_MAX];
     int error;
 
@@ -123,12 +116,11 @@ void loadTree(tdns *dns, char *configFile) {
             buffer = strtok(line," ");
             strncpy(url, buffer, DOMAIN_TAG_MAX);
             buffer = strtok(NULL,"");
-            strncpy(IP, buffer, IP_MAX);
-            if(validateURL(url)!=RES_OK && validateIP(IP)!=RES_OK) return RES_ERROR;
-            /*completar la estructura tdomain*/
-            /*falta agregar el diccionario de encriptación*/
+            strncpy(Ipa, buffer, IP_MAX);
+            if(validateURL(url)!=RES_OK && validateIP(Ipa)!=RES_OK) return RES_ERROR;
             strcpy(temp.domain,url);
-            strcpy(temp.ip,IP);
+            strcpy(temp.ip,Ipa);
+            temp.offset = genoffset(url);
             AB_Crear(&(temp.subab),sizeof(tdomain));
             error = addDomain(dns,url,&temp);
             if(error!=RES_OK) {
@@ -140,8 +132,8 @@ void loadTree(tdns *dns, char *configFile) {
     fclose(cfile);
 }
 
-int findDomain(TAB ab, const int mov, char* domain){
-    int err, *error;
+int findDomain(TAB* ab, const int mov, char* domain){
+    int *error;
     tdomain Aux;
     AB_MoverCte(ab, mov, error);
     if(*error==FALSE)
@@ -150,9 +142,9 @@ int findDomain(TAB ab, const int mov, char* domain){
     if(strcmp(domain,Aux.domain)==0)
         return FOUNDED;
     if(AB_CanMove(ab,DER))
-        return findDomain(dns, DER, domain);
+        return findDomain(ab, DER, domain);
     if(AB_CanMove(ab,IZQ))                            /*VER SI ESTA BIEN HACER UNA PRIMITIVA PARA ESTO EN TDA AB*/
-        return findDomain(dns, IZQ, domain);
+        return findDomain(ab, IZQ, domain);
 }
 
 void getValue(tdns dns, char* domain, void* data){
@@ -166,7 +158,7 @@ void getValue(tdns dns, char* domain, void* data){
 }
 
 int domainExists(TAB ab, char* domain){
-    return findDomain(ab, RAIZ, domain);
+    return findDomain(&ab, RAIZ, domain);
 }
 
 
@@ -232,10 +224,6 @@ int addSubDomain(TAB* a,tdomain* d,TPila pila,int* error) {
     }
     *error = RES_OK;
     return RES_OK;
-
-}
-
-
 
 }
 
