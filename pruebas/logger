@@ -1,0 +1,45 @@
+#include <stdio.h>
+#include <string.h>
+#include <time.h>
+#include <stdlib.h>
+
+#define RES_OK 0
+#define RES_ERROR 1
+
+
+void logging(FILE* logf, char *cmd, char* srcurl, char* srcip, char* dsturl, char* dstip, char* msg, char* encrypted) {
+    time_t t;
+    struct tm* t2;
+    t = time(NULL);
+    t2 = gmtime(&t);
+    fprintf(logf, "%s - %s - %s %s %s %s %s %s\n", asctime(t2), cmd, srcurl, srcip, dsturl, dstip, msg, encrypted);
+    fflush(logf);
+}
+
+
+
+int main(int argc,char** argv) {
+
+    char cmd[256] = "-dnsSend";
+    char src_url[256] = "www.google.com.ar";
+    char src_ipadd[16] = "180.166.130.174";
+    char dst_url[256] = "www.yahoo.com.ar";
+    char dst_ipadd[16] = "10.0.1.10";
+    char msg[256] = "se supone que tengo que encriptar esto, peron no";
+    char encrypted[256] = "igualmente no estamos probando el encriptador ahora";
+    char logg[256] = "log.txt";
+    FILE* logfile;
+
+    logfile = fopen(logg,"a");
+    if(!logfile) {
+        printf("No se pudo abrir el archivo de log.\n");
+        return RES_ERROR;
+    }
+
+    logging(logfile,cmd,src_url,src_ipadd,dst_url,dst_ipadd,msg,encrypted);
+
+    fclose(logfile);
+    return RES_OK;
+
+
+}
