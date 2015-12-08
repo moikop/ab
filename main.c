@@ -38,15 +38,35 @@ int main(int argc, char** argv) {
 
     /*Decidimos que accion es la que nos pide el usuario*/
 
-    switch(argv[1]) {
-        case CMD_SEND: break;
-        case CMD_GETIP: break;
-        case CMD_ADDDOMAIN:
-            /*setear una estructura con los datos que se pasan*/
-            if(addDomain(&dns,argv[2],const tdomain* td)!=RES_OK) return RES_ERROR;
-            break;
-        case CMD_DELETEDOMAIN: break;
-        default:
+    if (strcmp(argv[1], CMD_SEND) == 0) {
+        /*
+        argv[2] == srcurl
+        argv[3] == dsturl
+        argv[4] == msg
+        argv[5] == logger file
+        */
+    } else if (strcmp(argv[1], CMD_GETIP) == 0) {
+        /*
+        argv[2] == srcurl
+        argv[3] == dsturl
+        argv[4] == logger file
+        */
+    } else if (strcmp(argv[1], CMD_ADDDOMAIN) == 0) {
+        /*
+        argv[2] == url
+        argv[3] == IP
+        argv[4] == logger file
+        */
+        addDomain(NULL, argv[2], argv[3]);
+    } else if (strcmp(argv[1], CMD_DELETEDOMAIN) == 0) {
+        /*
+        argv[2] == url
+        argv[3] == logger file
+        */
+    } else {
+        /*
+        return ERROR_UNKNOWN_CMD
+        */
     }
 
     return RES_OK;

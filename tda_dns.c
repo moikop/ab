@@ -161,6 +161,33 @@ int domainExists(TAB ab, char* domain){
     return findDomain(&ab, RAIZ, domain);
 }
 
+/* By Moises */
+
+int addDomain(tdns *dns, char *domain, void *data) {
+    char *IP = (char*) data;
+    FILE *config;
+    char *line;
+
+    line = malloc(sizeof(char) * (strlen(domain) + strlen(IP)));
+    if (!line) return 0;
+
+    if (!validateDomain(domain, IP)) return 0;
+
+    strcpy(line, domain);
+    strcat(line, " ");
+    strcat(line, IP);
+
+    config = fopen("./config/domains", "a");
+    if (!config) return 0;
+
+    fprintf(config, "%s\n", line);
+    fclose(config);
+
+    free(line);
+    return 1;
+}
+
+/* By Ignacio */
 
 int addDomain(tdns* dns,char* domain,const tdomain* td) {
 
