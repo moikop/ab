@@ -189,6 +189,8 @@ int addDomain(tdns *dns, char *domain, void *data) {
 
 /* By Ignacio */
 
+/* toma una estructura tdomain completa (elem de la hoja) y la url en char* domain*/
+/* hace pila con la url, y llama a addSubDomain*/
 int addDomain(tdns* dns,char* domain,const tdomain* td) {
 
     TPila pila_dominio;
@@ -200,6 +202,7 @@ int addDomain(tdns* dns,char* domain,const tdomain* td) {
     return error;
 }
 
+/* recibe una referencia a un árbol, el dato d, la pila donde está la url, y una variable error*/
 int addSubDomain(TAB* a,tdomain* d,TPila pila,int* error) {
 
     char subdominio[DOMAIN_TAG_MAX];
@@ -253,7 +256,6 @@ int addSubDomain(TAB* a,tdomain* d,TPila pila,int* error) {
     return RES_OK;
 
 }
-
 /***********Funciones de validacion*************/
 
 void showHelp(char* name)
