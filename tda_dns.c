@@ -17,15 +17,17 @@
 #define MAX_LINE 300
 #define FOUNDED 256
 #define NOT_FOUNDED 255
+#define NO_DATA 254
 #define RES_OK 0
 #define RES_ERROR 1
 #define RES_MEM_ERROR -1
 
+/******************************************** Implementacion de primitivas **********************************************/
 
 int createDNS(tdns *dns, int dataSize) {
     AB_Crear(&(dns->ab), dataSize);
     dns->dataSize = dataSize;
-    return 1;
+    return RES_OK;
 }
 
 void destroyDNS(tdns *dns) {
@@ -33,35 +35,54 @@ void destroyDNS(tdns *dns) {
     free(dns);
 }
 
-/*int findDNS(TAB *tree, TPila *domain, char *name, int mov) {
-    int res = 0;
-    tdomain aux;
+/* toma una estructura tdomain completa (elem de la hoja) y la url*/
+/* hace pila con la url, y llama a addSubDomain*/
+int addDomain(tdns* dns,char* url,const tdomain* td) {
 
-    if (AB_Vacio(*tree)) return 0;
+    TPila pila_dominio;
+    int error;
 
-    AB_MoverCte(tree, mov);
-    AB_ElemCte(*tree, &aux);
+    breakDomain(url,&pila_dominio); /*acá adentro crea la pila*/
+    addSubDomain(dns->ab,td,pila_dominio,&error);
 
-    if ((!name) || strcmp(name, "") == 0 )
-        P_Sacar(domain, name);
+    return error;
+}
 
-    res = strcasecmp(aux.domain, name);
+void getValue(tdns* dns, char* url, tdomain* td){
 
-    if (res < 0) {
-        findDNS(tree, domain, name, DER);
-    } else if (res > 0) {
-        findDNS(tree, domain, name, IZQ);
-    } else {
-        if (P_Vacia(*domain)) {
-            return 1;
-        } else {
-            P_Sacar(domain, name);
-            findDNS(aux.subab, domain, name, RAIZ);
-        }
+    int buscar;
+    int obtener;
+    char domain[DOMAIN_TAG_MAX];
+    TPila pila;
+    tdomain Aux;
+
+    if(AB_Vacio(dns->ab))
+        return NO_DATA;
+
+    breakDomain(url,&pila);
+    if(findDNS(&ab,&pila,domain,RAIZ)!=RES_OK)
+    {
+        printf("No se encontró %s.\n",url);
     }
 
-    return 0;
-}*/
+    if(getData(dns->ab,&pila,domain,RAIZ,td)!=RES_OK) {
+        printf("No se pudo obtener el dato.\n");
+    }
+
+}
+
+int urlExists(TAB ab, char* url){
+
+    TPila pila;
+    char* domain[DOMAIN_TAG_MAX] = "";
+
+    breakDomain(url,&pila);
+    return findDNS(&ab,&pila,domain,RAIZ);
+}
+
+void deleteDomain(tdns *dns, char* domain);
+
+/************************************ Funciones utilizadas ************************************************************/
 
 int findDNS(TAB *tree, TPila *url,char* domain, int mov) {
     int res;
@@ -87,10 +108,43 @@ int findDNS(TAB *tree, TPila *url,char* domain, int mov) {
         return findDNS(tree,url,domain,IZQ);
     } else {
         if (P_Vacia(*url)) {
-            return RES_OK;
+            return RES_OK; /*lo encontramos*/
         } else {
             P_Sacar(url,domain);
             return findDNS(&(aux.subab),url,domain,RAIZ);
+        }
+    }
+}
+
+int getData(TAB *tree, TPila *url,char* domain, int mov,tdomain* td) {
+    int res;
+    int error;
+    char domain[DOMAIN_TAG_MAX];
+    tdomain aux;
+
+    if(AB_Vacio(*tree)) return RES_ERROR; /* arbol vacio, no lo encontré*/
+
+    AB_MoverCte(tree, mov,&error);
+    if(error) return RES_ERROR; /* no lo encontre */
+
+    AB_ElemCte(*tree, &aux);
+
+   if ((!domain) || strcmp(domain, "") == 0 )
+        P_Sacar(url,domain);
+
+    res = strcasecmp(aux.domain,domain);
+
+    if (res < 0) {
+        return getData(tree,url,domain,DER,td);
+    } else if (res > 0) {
+        return getData(tree,url,domain,IZQ,td);
+    } else {
+        if (P_Vacia(*url)) {
+            AB_Copy(td,&aux);
+            return RES_OK; /*lo encontramos*/
+        } else {
+            P_Sacar(url,domain);
+            return getData(&(aux.subab),url,domain,RAIZ,td);
         }
     }
 }
@@ -105,7 +159,7 @@ int orderInsert(TAB *tree, tdomain domain) {
     search = findDomain(tree,RAIZ,domain.domain);
 
     if (!search) {
-        AB_ElemCte(*(tree), &aux);
+        AB_ElemCte(*tree, &aux);
         if (strcasecmp(domain.domain, aux.domain) > 0)
             AB_Insertar(tree, DER, &domain, &error);
         else
@@ -132,7 +186,7 @@ void loadDomain(tdns *dns, TPila *domain) {
     orderInsert(&(dns->ab), domain);
 }
 
-void loadTree(tdns *dns, char *configFile) {
+int loadTree(tdns *dns, char *configFile) {
     FILE *cfile;
     tdomain temp;
     char* buffer;
@@ -163,6 +217,7 @@ void loadTree(tdns *dns, char *configFile) {
         }
     }
     fclose(cfile);
+    return RES_OK;
 }
 
 int findDomain(TAB* ab, const int mov, char* domain){
@@ -171,68 +226,13 @@ int findDomain(TAB* ab, const int mov, char* domain){
     AB_MoverCte(ab, mov, error);
     if(*error==FALSE)
         return NOT_FOUNDED;
-    AB_ElemCte(*(ab),&Aux);
+    AB_ElemCte(*ab,&Aux);
     if(strcmp(domain,Aux.domain)==0)
         return FOUNDED;
-    if(AB_CanMove(*(ab),DER))
+    if(AB_CanMove(*ab,DER))
         return findDomain(ab, DER, domain);
-    if(AB_CanMove(*(ab),IZQ))                            /*VER SI ESTA BIEN HACER UNA PRIMITIVA PARA ESTO EN TDA AB*/
+    if(AB_CanMove(*ab,IZQ))                            /*VER SI ESTA BIEN HACER UNA PRIMITIVA PARA ESTO EN TDA AB*/
         return findDomain(ab, IZQ, domain);
-}
-
-void getValue(tdns dns, char* domain, void* data){
-    tdomain Aux;
-    if(AB_Vacio(dns->ab))
-        return NO_DATA;              /*DEFINE*/
-    AB_ElemCte(dns->ab,&Aux);
-    domain=Aux.domain;
-    (char*)data=Aux.ip;             /*VER SI SE PUEDE CASTEAR ARGUMENTO Y EL TIPO DE AUX:IP*/
-    return RES_OK;
-}
-
-int domainExists(TAB ab, char* domain){
-    return findDomain(&ab, RAIZ, domain);
-}
-
-/* By Moises */
-
-int addDomain(tdns *dns, char *domain, void *data) {
-    char *IP = (char*) data;
-    FILE *config;
-    char *line;
-
-    line = malloc(sizeof(char) * (strlen(domain) + strlen(IP)));
-    if (!line) return 0;
-
-    if (!validateDomain(domain, IP)) return 0;
-
-    strcpy(line, domain);
-    strcat(line, " ");
-    strcat(line, IP);
-
-    config = fopen("./config/domains", "a");
-    if (!config) return 0;
-
-    fprintf(config, "%s\n", line);
-    fclose(config);
-
-    free(line);
-    return 1;
-}
-
-/* By Ignacio */
-
-/* toma una estructura tdomain completa (elem de la hoja) y la url en char* domain*/
-/* hace pila con la url, y llama a addSubDomain*/
-int addDomain(tdns* dns,char* domain,const tdomain* td) {
-
-    TPila pila_dominio;
-    int error;
-
-    breakDomain(domain,&pila_dominio); /*acá adentro crea la pila*/
-    addSubDomain(dns->ab,td,pila_dominio,&error);
-
-    return error;
 }
 
 /* recibe una referencia a un árbol, el dato d, la pila donde está la url, y una variable error*/
@@ -289,6 +289,7 @@ int addSubDomain(TAB* a,tdomain* d,TPila pila,int* error) {
     return RES_OK;
 
 }
+
 /***********Funciones de validacion*************/
 
 void showHelp(char* name)
