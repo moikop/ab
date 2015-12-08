@@ -43,7 +43,6 @@ int genoffset(char *domain) {
 
     srand(time(NULL));
     offset = (rand() % MAX_OFFSET) + 1;
-    printf("el offset será: %c\n",offset);
     fprintf(crypto, "%c", offset);
     fclose(crypto);
 
