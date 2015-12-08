@@ -33,7 +33,7 @@ void destroyDNS(tdns *dns) {
     free(dns);
 }
 
-int findDNS(TAB *tree, TPila *domain, char *name, int mov) {
+/*int findDNS(TAB *tree, TPila *domain, char *name, int mov) {
     int res = 0;
     tdomain aux;
 
@@ -61,7 +61,40 @@ int findDNS(TAB *tree, TPila *domain, char *name, int mov) {
     }
 
     return 0;
+}*/
+
+int findDNS(TAB *tree, TPila *url,char* domain, int mov) {
+    int res;
+    int error;
+    char domain[DOMAIN_TAG_MAX];
+    tdomain aux;
+
+    if(AB_Vacio(*tree)) return RES_ERROR; /* arbol vacio, no lo encontré*/
+
+    AB_MoverCte(tree, mov,&error);
+    if(error) return RES_ERROR; /* no lo encontre */
+
+    AB_ElemCte(*tree, &aux);
+
+   if ((!domain) || strcmp(domain, "") == 0 )
+        P_Sacar(url,domain);
+
+    res = strcasecmp(aux.domain,domain);
+
+    if (res < 0) {
+        return findDNS(tree,url,domain,DER);
+    } else if (res > 0) {
+        return findDNS(tree,url,domain,IZQ);
+    } else {
+        if (P_Vacia(*url)) {
+            return RES_OK;
+        } else {
+            P_Sacar(url,domain);
+            return findDNS(&(aux.subab),url,domain,RAIZ);
+        }
+    }
 }
+
 
 int orderInsert(TAB *tree, tdomain domain) {
     int error;
