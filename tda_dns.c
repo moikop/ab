@@ -50,8 +50,6 @@ int addDomain(tdns* dns,char* url,const tdomain* td) {
 
 void getValue(tdns* dns, char* url, tdomain* td){
 
-    int buscar;
-    int obtener;
     char domain[DOMAIN_TAG_MAX];
     TPila pila;
     tdomain Aux;
@@ -60,11 +58,6 @@ void getValue(tdns* dns, char* url, tdomain* td){
         return NO_DATA;
 
     breakDomain(url,&pila);
-    if(findDNS(&ab,&pila,domain,RAIZ)!=RES_OK)
-    {
-        printf("No se encontró %s.\n",url);
-    }
-
     if(getData(dns->ab,&pila,domain,RAIZ,td)!=RES_OK) {
         printf("No se pudo obtener el dato.\n");
     }
@@ -80,7 +73,18 @@ int urlExists(TAB ab, char* url){
     return findDNS(&ab,&pila,domain,RAIZ);
 }
 
-void deleteDomain(tdns *dns, char* domain);
+void deleteUrl(tdns *dns, char* url) {
+
+    char domain[DOMAIN_TAG_MAX];
+    TPila pila;
+    tdomain Aux;
+
+    breakDomain(url,&pila);
+    if(deleteData(dns->ab,&pila,domain,RAIZ)!=RES_OK) {
+        printf("No se pudo obtener el dato.\n");
+    }
+
+}
 
 /************************************ Funciones utilizadas ************************************************************/
 
@@ -141,6 +145,45 @@ int getData(TAB *tree, TPila *url,char* domain, int mov,tdomain* td) {
     } else {
         if (P_Vacia(*url)) {
             AB_Copy(td,&aux);
+            return RES_OK; /*lo encontramos*/
+        } else {
+            P_Sacar(url,domain);
+            return getData(&(aux.subab),url,domain,RAIZ,td);
+        }
+    }
+}
+
+int deleteData(TAB* ab,TPila* pila,char* domain,int mov) {
+
+    int res;
+    int error;
+    char domain[DOMAIN_TAG_MAX];
+    tdomain aux;
+    tdomain reemplazo;
+
+    if(AB_Vacio(*tree)) return RES_ERROR; /* arbol vacio, no lo encontré*/
+
+    AB_MoverCte(tree, mov,&error);
+    if(error) return RES_ERROR; /* no lo encontre */
+
+    AB_ElemCte(*tree, &aux);
+
+   if ((!domain) || strcmp(domain, "") == 0 )
+        P_Sacar(url,domain);
+
+    res = strcasecmp(aux.domain,domain);
+
+    if (res < 0) {
+        return getData(tree,url,domain,DER,td);
+    } else if (res > 0) {
+        return getData(tree,url,domain,IZQ,td);
+    } else {
+        if (P_Vacia(*url)) {
+            strcpy(reemplazo.domain,"");
+            strcpy(reemplazo.ip,"");
+            strcpy(reemplazo.offset,"");
+            AB_Vaciar(&(reemplazo.subab));
+            AB_ModifCte(ab,&reemplazo);
             return RES_OK; /*lo encontramos*/
         } else {
             P_Sacar(url,domain);
@@ -290,7 +333,7 @@ int addSubDomain(TAB* a,tdomain* d,TPila pila,int* error) {
 
 }
 
-/***********Funciones de validacion*************/
+/******************************************* Funciones de validacion *******************************************************/
 
 void showHelp(char* name)
 {
