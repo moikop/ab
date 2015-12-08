@@ -7,11 +7,11 @@
     #define DER 2
     #define PAD 3
     #define RAIZ 4
-    #if!defined(RES_ARBOL_VACIO)
+    #ifndef(RES_ARBOL_VACIO)
         #define RES_ARBOL_VACIO 0
-    #if!defined(RES_OK)
+    #ifndef(RES_OK)
         #define RES_OK 0
-    #if!defined(RES_MOV_INVALIDO)
+    #ifndef(RES_MOV_INVALIDO)
         #define RES_MOV_INVALIDO 1
 
     typedef struct TNodoAB
