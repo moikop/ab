@@ -56,40 +56,40 @@
     void destroyDNS(tdns *dns);
 
     /*
-     Descripcion: Agrega un dominio con un dato asociado.
-    Precondiciones: dns creado. dominio es un nombre de dominio válido y no existente
+     Descripcion: Agrega una url con un dato asociado.
+    Precondiciones: dns creado. url es un nombre de url válido y no existente
     en dns. dato apunta a una variable de tipo T.
-    Postcondiciones: Se agregó el domino dominio, y se asocio
+    Postcondiciones: Se agregó la url, y se asocio
     el valor dato.
     */
-    int addDomain(tdns *dns, char* domain, void* data);
+    int addDomain(tdns *dns, char* url, void* data);
 
     /*
     obtenerValor
-    Descripcion: Obtiene el valor asociado a un dominio.
-    Precondiciones: dns creado. dominio es un nombre de dominio válido existente en
+    Descripcion: Obtiene el valor asociado a una url.
+    Precondiciones: dns creado. url es un nombre de url válido existente en
     dns. dato apunta a una variable de tipo T.
-    Postcondiciones: Se copió a dato el valor asociado al dominio dominio.
+    Postcondiciones: Se copió a dato el valor asociado a la url.
     */
-    void getValue(tdns dns, char* domain, void* data);
+    void getValue(tdns dns, char* url, void* data);
 
     /*
-    existeDominio
-    Descripcion: Devuelve TRUE si dominio existe en dns. En cualquier otro caso devuelve
+    existeUrl
+    Descripcion: Devuelve TRUE si url existe en dns. En cualquier otro caso devuelve
     FALSE.
-    Precondiciones: dns creado. dominio es un nombre de dominio válido.
+    Precondiciones: dns creado. url es un nombre de url válido.
     Postcondiciones: No realiza modificaciones.
     */
-    int domainExists(tdns dns, char* domain);
+    int urlExists(tdns dns, char* url);
 
     /*
-    eliminarDominio
-    Descripcion: Elimina un dominio.
-    Precondiciones: dns creado. dominio es un nombre de dominio válido y existente en
+    eliminarUrl
+    Descripcion: Elimina un url.
+    Precondiciones: dns creado. url es un nombre de url válido y existente en
     dns.
-    Postcondiciones: Se eliminó dominio, y su valor asociado, de dns
+    Postcondiciones: Se eliminó url, y su valor asociado, de dns
     */
-    void deleteDomain(tdns *dns, char* domain);
+    void deleteUrl(tdns *dns, char* url);
 
 
 #endif
