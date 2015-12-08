@@ -27,6 +27,7 @@ int main(int argc, char** argv) {
     int loaded;
     tdns dns;
     tdomain td;
+    tdomain data;
 
     /*validacion parámetros de entrada*/
     if(validateInput(argv,&cmd)!=RES_OK) {
@@ -49,16 +50,21 @@ int main(int argc, char** argv) {
         case CMD_SEND:
             if(urlExists(dns.ab,argv[2])!=RES_OK) return RES_ERROR;
             if(urlExists(dns.ab,argv[4])!=RES_OK) return RES_ERROR;
-            /* obtengo el elemento del origen y offset = td.offset*/
-            getoffset(argv[2],&offset);
-            encryptMsg(msg,offset);
-            log(logf,CMD_SEND,argv[2],"",argv[3],"",argv[4],msg);
+            getValue(&dns,argv[2],&data);
+            strcpy(ip_origen,data.ip);
+            getValue(&dns,argv[4],&data);
+            strcpy(ip_destino,data.ip);
+            encryptMsg(msg,&data.offset);
+            log(logf,CMD_SEND,argv[2],ip_origen,argv[3],ip_destino,argv[4],msg);
             printf("Mensaje encriptado: %s\n",msg);
             break;
         case CMD_GETIP:
             if(urlExists(dns.ab,argv[2])!=RES_OK) return RES_ERROR;
             if(urlExists(dns.ab,argv[4])!=RES_OK) return RES_ERROR;
-            /* obtengo los elementos de ambos y me copia las ips*/
+            getValue(&dns,argv[2],&data);
+            strcpy(ip_origen,data.ip);
+            getValue(&dns,argv[4],&data);
+            strcpy(ip_destino,data.ip);
             log(logf,CMD_GETIP,argv[2],ip_origen,argv[3],ip_destino,"","");
             printf("Origen: %s %s\nDestino: %s %s\n",argv[2],ip_origen,argv[3],ip_destino);
             break;
