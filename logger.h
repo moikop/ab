@@ -1,4 +1,9 @@
-#ifndef LOGGER_H_INCLUDED
+#include <time.h>
+#include <stdio.h>
+
+void log(FILE* logf, char *cmd, char* srcurl, char* srcip, char* dsturl, char* dstip, char* msg, char* encrypted);
+
+/*#ifndef LOGGER_H_INCLUDED
 #define LOGGER_H_INCLUDED
 
 #include <time.h>
@@ -10,3 +15,4 @@ void log(FILE *logf, char *cmd, char* srcurl, char* srcip, char* dsturl, char* d
 }
 
 #endif
+*/
