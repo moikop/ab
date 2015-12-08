@@ -14,8 +14,8 @@ void AB_Copy(tdomain *dst, tdomain *src) {
         strcpy(dst->domain, src->domain);
     if (src->ip)
         strcpy(dst->ip, src->ip);
-    if (src->subab)
-        memcpy(dst->subab, src->subab, sizeof(TAB));
+    if (&(src->subab)!=NULL)
+        memcpy(&(dst->subab),&(src->subab), sizeof(TAB));   
 }
 
 void AB_ElemCte(TAB a,void *elem)
