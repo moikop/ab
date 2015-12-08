@@ -72,7 +72,7 @@ int orderInsert(TAB *tree, tdomain domain) {
     search = findDomain(tree,RAIZ,domain.domain);
 
     if (!search) {
-        AB_ElemCte(tree, &aux);
+        AB_ElemCte(*(tree), &aux);
         if (strcasecmp(domain.domain, aux.domain) > 0)
             AB_Insertar(tree, DER, &domain, &error);
         else
@@ -138,12 +138,12 @@ int findDomain(TAB* ab, const int mov, char* domain){
     AB_MoverCte(ab, mov, error);
     if(*error==FALSE)
         return NOT_FOUNDED;
-    AB_ElemCte(ab,&Aux);
+    AB_ElemCte(*(ab),&Aux);
     if(strcmp(domain,Aux.domain)==0)
         return FOUNDED;
-    if(AB_CanMove(ab,DER))
+    if(AB_CanMove(*(ab),DER))
         return findDomain(ab, DER, domain);
-    if(AB_CanMove(ab,IZQ))                            /*VER SI ESTA BIEN HACER UNA PRIMITIVA PARA ESTO EN TDA AB*/
+    if(AB_CanMove(*(ab),IZQ))                            /*VER SI ESTA BIEN HACER UNA PRIMITIVA PARA ESTO EN TDA AB*/
         return findDomain(ab, IZQ, domain);
 }
 
