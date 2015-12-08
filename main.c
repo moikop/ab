@@ -87,7 +87,7 @@ int main(int argc, char** argv) {
                 printf("No existe %s para eliminar.\n",argv[2]);
                 return RES_ERROR;
             }
-            /* primitiva para eliminar */
+            deleteUrl(&dns,argv[2]);
             log(logf,CMD_DELETEDOMAIN,argv[2],ip_origen,"","","","");
             printf("Se elimino a %s con ip %s.\n",argv[2],ip_origen);
             break;
