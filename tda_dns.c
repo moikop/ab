@@ -64,13 +64,13 @@ void getValue(tdns* dns, char* url, tdomain* td){
 
 }
 
-int urlExists(TAB ab, char* url){
+int urlExists(tdns dns, char* url){
 
     TPila pila;
     char* domain[DOMAIN_TAG_MAX] = "";
 
     breakDomain(url,&pila);
-    return findDNS(&ab,&pila,domain,RAIZ);
+    return findDNS(&(dns.ab),&pila,domain,RAIZ);
 }
 
 void deleteUrl(tdns *dns, char* url) {
