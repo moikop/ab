@@ -46,7 +46,7 @@ int main(int argc, char** argv) {
 
     /*Decidimos que accion es la que nos pide el usuario*/
 
-    switch(argv[1]) {
+    switch(argv[1]) {                                              /*UNA SOLA ACCION POR EJECUCION??*/
         case CMD_SEND:
             if(urlExists(dns.ab,argv[2])!=RES_OK) return RES_ERROR;
             if(urlExists(dns.ab,argv[4])!=RES_OK) return RES_ERROR;
