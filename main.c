@@ -51,10 +51,10 @@ int main(int argc, char** argv) {
             if(urlExists(dns.ab,argv[2])!=RES_OK) return RES_ERROR;
             if(urlExists(dns.ab,argv[4])!=RES_OK) return RES_ERROR;
             getValue(&dns,argv[2],&data);
-            strcpy(ip_origen,data.ip);
+            strcpy(ip_origen,data.ip);                    /*CREO QUE HAY Q USAR PUNTEROS ACA y abajo tambien*/
             getValue(&dns,argv[4],&data);
-            strcpy(ip_destino,data.ip);
-            encryptMsg(msg,&data.offset);
+            strcpy(ip_destino,data.ip);                   
+            encryptMsg(msg,&(data.offset));
             log(logf,CMD_SEND,argv[2],ip_origen,argv[3],ip_destino,argv[4],msg);
             printf("Mensaje encriptado: %s\n",msg);
             break;
@@ -62,7 +62,7 @@ int main(int argc, char** argv) {
             if(urlExists(dns.ab,argv[2])!=RES_OK) return RES_ERROR;
             if(urlExists(dns.ab,argv[4])!=RES_OK) return RES_ERROR;
             getValue(&dns,argv[2],&data);
-            strcpy(ip_origen,data.ip);
+            strcpy(ip_origen,data.ip);              /*VER PUNTEROS y abajo tambien*/
             getValue(&dns,argv[4],&data);
             strcpy(ip_destino,data.ip);
             log(logf,CMD_GETIP,argv[2],ip_origen,argv[3],ip_destino,"","");
@@ -73,7 +73,7 @@ int main(int argc, char** argv) {
                 printf("Ya existe %s.\n",argv[2]);
                 return RES_ERROR;
             }
-            strcpy(td.domain,argv[2]);
+            strcpy(td.domain,argv[2]);              /*VER PUNTEROS*/
             strcpy(td.ip,argv[3]);
             genoffset(td.domain);
             getoffset(td.domain,&(td.offset));
