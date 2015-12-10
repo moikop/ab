@@ -152,7 +152,7 @@ int loadTree(tdns *dns, char *configFile) {
     return RES_OK;
 }
 
-int processData(tdns* dns,char** argv,char* cmd,FILE** logf) {
+int processData(tdns* dns,char** argv,char* cmd,FILE* logf) {
 
     tdomain data;
     tdomain td;
@@ -168,7 +168,7 @@ int processData(tdns* dns,char** argv,char* cmd,FILE** logf) {
         getValue(dns,argv[4],&data);
         strcpy(ip_destino,data.ip);
         encryptMsg(msg,data.offset);
-        log(*logf,CMD_SEND,argv[2],ip_origen,argv[3],ip_destino,argv[4],msg);
+        log(logf,CMD_SEND,argv[2],ip_origen,argv[3],ip_destino,argv[4],msg);
         printf("Mensaje encriptado: %s\n",msg);
     }
     else if(strcmp(argv[1],CMD_GETIP)==0) {
@@ -178,7 +178,7 @@ int processData(tdns* dns,char** argv,char* cmd,FILE** logf) {
         strcpy(ip_origen,data.ip);
         getValue(dns,argv[4],&data);
         strcpy(ip_destino,data.ip);
-        log(*logf,CMD_GETIP,argv[2],ip_origen,argv[3],ip_destino,"","");
+        log(logf,CMD_GETIP,argv[2],ip_origen,argv[3],ip_destino,"","");
         printf("Origen: %s %s\nDestino: %s %s\n",argv[2],ip_origen,argv[3],ip_destino);
     }
     else if(strcmp(argv[1],CMD_ADDDOMAIN)==0) {
@@ -192,7 +192,7 @@ int processData(tdns* dns,char** argv,char* cmd,FILE** logf) {
         getoffset(td.domain,&(td.offset));
         AB_Crear(&(td.subab),sizeof(tdomain));
         if(addDomain(dns,argv[2],&td)!=RES_OK) return RES_ERROR;
-        log(*logf,CMD_ADDDOMAIN,argv[2],argv[3],"","","","");
+        log(logf,CMD_ADDDOMAIN,argv[2],argv[3],"","","","");
         printf("Se agrego %s con direccion ip %s.\n",argv[2],argv[3]);
     }
     else if(strcmp(argv[1],CMD_DELETEDOMAIN)) {
@@ -201,7 +201,7 @@ int processData(tdns* dns,char** argv,char* cmd,FILE** logf) {
             return RES_ERROR;
         }
         deleteUrl(dns,argv[2]);
-        log(*logf,CMD_DELETEDOMAIN,argv[2],ip_origen,"","","","");
+        log(logf,CMD_DELETEDOMAIN,argv[2],ip_origen,"","","","");
         printf("Se elimino a %s con ip %s.\n",argv[2],ip_origen);
     } else {
         printf("Comando equivocado.\n");
@@ -249,7 +249,7 @@ int main(int argc, char** argv) {
     }
 
     /*Decidimos que accion es la que nos pide el usuario*/
-    error = processData(&dns,argv,cmd,&logf);
+    error = processData(&dns,argv,cmd,logf);
     if(error!=RES_OK) {
         printf("Ocurrió un error: %i.\n",error);
         fclose(logf);
