@@ -1,26 +1,10 @@
-#include "dns.h"
+#include "tda_dns.h"
 #include "ab.h"
+#include "pila.h"
 
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-
-#define ARGS_DNS_SEND 6
-#define ARGS_DNS_GET_IP 5
-#define ARGS_DNS_ADD_DOMAIN 5
-#define ARGS_DNS_DELETE_DOMAIN 4
-#define DOMAIN_NAME_MAX 256
-#define DOMAIN_TAG_MAX 64
-#define IP_MAX 16
-#define DASH "-"
-#define DOT "."
-#define MAX_LINE 300
-#define FOUNDED 256
-#define NOT_FOUNDED 255
-#define NO_DATA 254
-#define RES_OK 0
-#define RES_ERROR 1
-#define RES_MEM_ERROR -1
 
 /******************************************** Implementacion de primitivas **********************************************/
 
@@ -55,7 +39,7 @@ void getValue(tdns* dns, char* url, tdomain* td){
     tdomain Aux;
 
     if(AB_Vacio(dns->ab))
-        return NO_DATA;
+        return;
 
     breakDomain(url,&pila);
     if(getData(dns->ab,&pila,domain,RAIZ,td)!=RES_OK) {
@@ -67,7 +51,7 @@ void getValue(tdns* dns, char* url, tdomain* td){
 int urlExists(tdns dns, char* url){
 
     TPila pila;
-    char* domain[DOMAIN_TAG_MAX] = "";
+    char domain[DOMAIN_TAG_MAX] = "";
 
     breakDomain(url,&pila);
     return findDNS(&(dns.ab),&pila,domain,RAIZ);
@@ -91,7 +75,10 @@ void deleteUrl(tdns *dns, char* url) {
 int findDNS(TAB *tree, TPila *url,char* domain, int mov) {
     int res;
     int error;
+    /*
+    TODO: REVISAR!! Por que se define domain dos veces
     char domain[DOMAIN_TAG_MAX];
+    */
     tdomain aux;
 
     if(AB_Vacio(*tree)) return RES_ERROR; /* arbol vacio, no lo encontré*/
@@ -123,7 +110,10 @@ int findDNS(TAB *tree, TPila *url,char* domain, int mov) {
 int getData(TAB *tree, TPila *url,char* domain, int mov,tdomain* td) {
     int res;
     int error;
+    /*
+    TODO: Por que se define domain dos veces
     char domain[DOMAIN_TAG_MAX];
+    */
     tdomain aux;
 
     if(AB_Vacio(*tree)) return RES_ERROR; /* arbol vacio, no lo encontré*/
@@ -153,11 +143,14 @@ int getData(TAB *tree, TPila *url,char* domain, int mov,tdomain* td) {
     }
 }
 
-int deleteData(TAB* ab,TPila* pila,char* domain,int mov) {
+int deleteData(TAB* tree,TPila* url,char* domain,int mov) {
 
     int res;
     int error;
+    /*
+    TODO: Por que se define domain dos veces
     char domain[DOMAIN_TAG_MAX];
+    */
     tdomain aux;
     tdomain reemplazo;
 
@@ -181,7 +174,7 @@ int deleteData(TAB* ab,TPila* pila,char* domain,int mov) {
         if (P_Vacia(*url)) {
             strcpy(reemplazo.domain,"");
             strcpy(reemplazo.ip,"");
-            strcpy(reemplazo.offset,"");
+            reemplazo.offset = '';
             AB_Vaciar(&(reemplazo.subab));
             AB_ModifCte(ab,&reemplazo);
             return RES_OK; /*lo encontramos*/
@@ -217,7 +210,7 @@ void breakDomain(char *domain, TPila *pile) {
     char buffer[DOMAIN_TAG_MAX];
 
     P_Crear(pile, sizeof(char) * DOMAIN_TAG_MAX);
-    pointer = strtok(domain, DOT)
+    pointer = strtok(domain, DOT);
     while (pointer) {
         strcpy(buffer, pointer);
         P_Agregar(pile, buffer);
@@ -270,7 +263,7 @@ int addSubDomain(TAB* a,tdomain* d,TPila pila,int* error) {
             *error = RES_ERROR;
             return *error;
         }
-        AB_ElemCte(a,&domain);
+        AB_ElemCte(*a,&domain);
         addSubDomain(&(domain.subab),d,pila,error);
         if(*error!=RES_OK) return *error;
         AB_ModifCte(a,domain);

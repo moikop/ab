@@ -15,7 +15,22 @@
 
     #include "ab.h"
 
-    #define MAX_LINE 270
+    #define ARGS_DNS_SEND 6
+    #define ARGS_DNS_GET_IP 5
+    #define ARGS_DNS_ADD_DOMAIN 5
+    #define ARGS_DNS_DELETE_DOMAIN 4
+    #define DOMAIN_NAME_MAX 256
+    #define DOMAIN_TAG_MAX 64
+    #define IP_MAX 16
+    #define DASH "-"
+    #define DOT "."
+    #define MAX_LINE 300
+    #define FOUNDED 256
+    #define NOT_FOUNDED 255
+    #define NO_DATA 254
+    #define RES_OK 0
+    #define RES_ERROR 1
+    #define RES_MEM_ERROR -1
 
     typedef struct {
         char domain[256];
@@ -62,7 +77,7 @@
     Postcondiciones: Se agregó la url, y se asocio
     el valor dato.
     */
-    int addDomain(tdns *dns, char* url, void* data);
+    int addDomain(tdns *dns, char* url, const tdomain *td);
 
     /*
     obtenerValor
@@ -71,7 +86,7 @@
     dns. dato apunta a una variable de tipo T.
     Postcondiciones: Se copió a dato el valor asociado a la url.
     */
-    void getValue(tdns dns, char* url, void* data);
+    void getValue(tdns *dns, char* url, tdomain *td);
 
     /*
     existeUrl

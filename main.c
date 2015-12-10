@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 
 #include "tda_dns.h"
 #include "logger.h"
@@ -166,7 +168,7 @@ int processData(tdns* dns,char** argv,char* cmd,FILE** logf) {
         getValue(dns,argv[4],&data);
         strcpy(ip_destino,data.ip);
         encryptMsg(msg,data.offset);
-        log(logf,CMD_SEND,argv[2],ip_origen,argv[3],ip_destino,argv[4],msg);
+        log(*logf,CMD_SEND,argv[2],ip_origen,argv[3],ip_destino,argv[4],msg);
         printf("Mensaje encriptado: %s\n",msg);
     }
     else if(strcmp(argv[1],CMD_GETIP)==0) {
@@ -176,7 +178,7 @@ int processData(tdns* dns,char** argv,char* cmd,FILE** logf) {
         strcpy(ip_origen,data.ip);
         getValue(dns,argv[4],&data);
         strcpy(ip_destino,data.ip);
-        log(logf,CMD_GETIP,argv[2],ip_origen,argv[3],ip_destino,"","");
+        log(*logf,CMD_GETIP,argv[2],ip_origen,argv[3],ip_destino,"","");
         printf("Origen: %s %s\nDestino: %s %s\n",argv[2],ip_origen,argv[3],ip_destino);
     }
     else if(strcmp(argv[1],CMD_ADDDOMAIN)==0) {
@@ -190,7 +192,7 @@ int processData(tdns* dns,char** argv,char* cmd,FILE** logf) {
         getoffset(td.domain,&(td.offset));
         AB_Crear(&(td.subab),sizeof(tdomain));
         if(addDomain(dns,argv[2],&td)!=RES_OK) return RES_ERROR;
-        log(logf,CMD_ADDDOMAIN,argv[2],argv[3],"","","","");
+        log(*logf,CMD_ADDDOMAIN,argv[2],argv[3],"","","","");
         printf("Se agrego %s con direccion ip %s.\n",argv[2],argv[3]);
     }
     else if(strcmp(argv[1],CMD_DELETEDOMAIN)) {
@@ -199,11 +201,11 @@ int processData(tdns* dns,char** argv,char* cmd,FILE** logf) {
             return RES_ERROR;
         }
         deleteUrl(dns,argv[2]);
-        log(logf,CMD_DELETEDOMAIN,argv[2],ip_origen,"","","","");
+        log(*logf,CMD_DELETEDOMAIN,argv[2],ip_origen,"","","","");
         printf("Se elimino a %s con ip %s.\n",argv[2],ip_origen);
     } else {
         printf("Comando equivocado.\n");
-        showHelp();
+        showHelp(argv[0]);
         return RES_ERROR;
     }
     return RES_OK;
@@ -216,14 +218,14 @@ int main(int argc, char** argv) {
     tdns dns;
     char cmd[100];
     char file_dns[100] = "dns.txt";
-    char logfile = "log.txt";
+    char logfile[] = "log.txt";
     int loaded;
     int error;
     int crear;
 
     /*validacion parámetros de entrada*/
-    if(validateInput(argv,&cmd)!=RES_OK) {
-        showHelp();
+    if(validateInput(argc, argv, (char**)&cmd)!=RES_OK) {
+        showHelp(argv[0]);
         return RES_ERROR;
     }
 
