@@ -22,7 +22,7 @@ int findDomain(TAB* ab, const int mov, char* domain){
     printf("Entramos en FindDomain.\n");
 
     AB_MoverCte(ab, mov, &error);
-    printf("Obtuve el corriente: %i\n",error);
+    printf("Muevo el corriente: %i\n",error);
 
     if(error==RES_ERROR)
         return RES_ERROR;
@@ -34,10 +34,14 @@ int findDomain(TAB* ab, const int mov, char* domain){
     cmp = strcmp(domain,Aux.domain);
     if(cmp==0) return RES_OK;
 
-    if(cmp<0)
+    if(cmp<0) {
+        printf("Me muevo a la izquierda.\n");
         return findDomain(ab,IZQ,domain);
-    else
+    }
+    else {
+        printf("Me muevo a la derecha.\n");
         return findDomain(ab,DER,domain);
+    }
 
 /*    if(AB_CanMove(*ab,IZQ))
         find = findDomain(ab, IZQ, domain);
@@ -93,9 +97,10 @@ int main(int argc, char** argv) {
     strcpy(&td.offset,t2);
     AB_Crear(&(td.subab),tdato);
 
+    AB_MoverCte(&ab,RAIZ,&error);
     AB_Insertar(&ab,DER,&td,&error);
     if(error==RES_ERROR) {
-        printf("No insertó la IZQ.\n");
+        printf("No insertó la DER.\n");
         return RES_ERROR;
     }
 
