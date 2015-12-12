@@ -1,0 +1,161 @@
+#include <stdio.h>
+#include <string.h>
+#include "ab.h"
+
+#define RES_OK 0
+#define RES_ERROR 1
+#define RES_MEM_ERROR -1
+
+typedef struct {
+    char domain[256];
+    char ip[16];
+    TAB subab;
+    char offset;
+}tdomain;
+
+
+int findDomain(TAB* ab, const int mov, char* domain){
+    int error;
+    tdomain Aux;
+    int cmp;
+
+    printf("Entramos en FindDomain.\n");
+
+    AB_MoverCte(ab, mov, &error);
+    printf("Muevo el corriente: %i\n",error);
+
+    if(error==RES_ERROR)
+        return RES_ERROR;
+
+    AB_ElemCte(*ab,&Aux);
+
+    printf("El actual es: %s.\n",Aux.domain);
+
+    cmp = strcmp(domain,Aux.domain);
+    if(cmp==0) return RES_OK;
+
+    if(cmp<0) {
+        printf("Me muevo a la izquierda.\n");
+        return findDomain(ab,IZQ,domain);
+    }
+    else {
+        printf("Me muevo a la derecha.\n");
+        return findDomain(ab,DER,domain);
+    }
+}
+
+int searchPlace(TAB* ab,tdomain* domain,int* mov) {
+
+    tdomain tdaux;
+    int cmp;
+    int error;
+
+    AB_MoverCte(ab,*mov,&error);
+    if(error==RES_ERROR) return RES_ERROR;
+    AB_ElemCte(*ab,&tdaux);
+    cmp = strcmp(domain->domain,tdaux.domain);
+    if(cmp==0) return RES_OK;
+    if(cmp<0) *mov=IZQ;
+    else *mov=DER;
+    return searchPlace(ab,domain,mov);
+}
+
+int orderInsert(TAB *tree, tdomain domain) {
+    int error;
+    int search = 0;
+    int mov = RAIZ ;
+
+    search = searchPlace(tree,&domain,&mov);
+
+    if(search==RES_OK) {
+        printf("Ya existe en el arbol %s.\n",domain.domain);
+        return RES_ERROR;
+    }
+
+    AB_Insertar(tree,mov,&domain,&error);
+
+    if(error==RES_ERROR) {
+        printf("No pudo insertar ordenado.\n");
+    }
+    else printf("Pudo insertar ordenado.\n");
+
+    return error;
+
+}
+
+int main(int argc, char** argv) {
+
+    TAB ab;
+    tdomain td;
+    tdomain tdaux;
+    int tdato = sizeof(tdomain);
+    int error;
+    char to[2] = "a";
+    char t1[2] = "b";
+    char t2[2] = "c";
+
+    AB_Crear(&ab,tdato);
+
+    strcpy(td.domain,"google");
+    strcpy(td.ip,"180.166.130.111");
+    strcpy(&td.offset,to);
+    AB_Crear(&(td.subab),tdato);
+
+    if(orderInsert(&ab,td)==RES_ERROR) {
+        printf("No insertó %s.\n",td.domain);
+        return RES_ERROR;
+    }
+
+    strcpy(td.domain,"bing");
+    strcpy(td.ip,"180.1.1.1");
+    strcpy(&td.offset,t1);
+    AB_Crear(&(td.subab),tdato);
+
+    if(orderInsert(&ab,td)==RES_ERROR) {
+        printf("No insertó %s.\n",td.domain);
+        return RES_ERROR;
+    }
+
+    strcpy(td.domain,"yahoo");
+    strcpy(td.ip,"1.1.1.1");
+    strcpy(&td.offset,t2);
+    AB_Crear(&(td.subab),tdato);
+
+    if(orderInsert(&ab,td)==RES_ERROR) {
+        printf("No insertó %s.\n",td.domain);
+        return RES_ERROR;
+    }
+
+    strcpy(td.domain,"net");
+    strcpy(td.ip,"1.1.1.1");
+    strcpy(&td.offset,t2);
+    AB_Crear(&(td.subab),tdato);
+
+    if(orderInsert(&ab,td)==RES_ERROR) {
+        printf("No insertó %s.\n",td.domain);
+        return RES_ERROR;
+    }
+
+    printf("Se insertaron en el arbol.\n");
+
+    printf("Ahora veo el orden.\n");
+
+    AB_MoverCte(&ab,RAIZ,&error);
+    AB_MoverCte(&ab,IZQ,&error);
+    AB_ElemCte(ab,&tdaux);
+    printf("Izquierda: %s\n",tdaux.domain);
+
+    AB_MoverCte(&ab,RAIZ,&error);
+    AB_ElemCte(ab,&tdaux);
+    printf("Raiz: %s\n",tdaux.domain);
+
+    AB_MoverCte(&ab,RAIZ,&error);
+    AB_MoverCte(&ab,DER,&error);
+    AB_ElemCte(ab,&tdaux);
+    printf("Derecha: %s\n",tdaux.domain);
+    AB_MoverCte(&ab,IZQ,&error);
+    AB_ElemCte(ab,&tdaux);
+    printf("Izquierda de la Derecha: %s\n",tdaux.domain);
+
+    return RES_OK;
+}
