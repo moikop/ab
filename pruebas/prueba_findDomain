@@ -1,0 +1,118 @@
+#include <stdio.h>
+#include <string.h>
+#include "ab.h"
+
+#define RES_OK 0
+#define RES_ERROR 1
+#define RES_MEM_ERROR -1
+
+typedef struct {
+    char domain[256];
+    char ip[16];
+    TAB subab;
+    char offset;
+}tdomain;
+
+
+int findDomain(TAB* ab, const int mov, char* domain){
+    int error;
+    tdomain Aux;
+    int cmp;
+
+    printf("Entramos en FindDomain.\n");
+
+    AB_MoverCte(ab, mov, &error);
+    printf("Obtuve el corriente: %i\n",error);
+
+    if(error==RES_ERROR)
+        return RES_ERROR;
+
+    AB_ElemCte(*ab,&Aux);
+
+    printf("El actual es: %s.\n",Aux.domain);
+
+    cmp = strcmp(domain,Aux.domain);
+    if(cmp==0) return RES_OK;
+
+    if(cmp<0)
+        return findDomain(ab,IZQ,domain);
+    else
+        return findDomain(ab,DER,domain);
+
+/*    if(AB_CanMove(*ab,IZQ))
+        find = findDomain(ab, IZQ, domain);
+    if(find == RES_ERROR && AB_CanMove(*ab,DER))
+        find = findDomain(ab, DER, domain);
+    return find;*/
+}
+
+int main(int argc, char** argv) {
+
+    TAB ab;
+    char domain[64];
+    char d[] = "yahoo";
+    tdomain td;
+    tdomain tdaux;
+    int tdato = sizeof(tdomain);
+    int error;
+    char to[2] = "a";
+    char t1[2] = "b";
+    char t2[2] = "c";
+
+    AB_Crear(&ab,tdato);
+
+    strcpy(td.domain,"google");
+    strcpy(td.ip,"180.166.130.111");
+    strcpy(&td.offset,to);
+    AB_Crear(&(td.subab),tdato);
+
+    AB_Insertar(&ab,RAIZ,&td,&error);
+    if(error==RES_ERROR) {
+        printf("No insertó la RAIZ.\n");
+        return RES_ERROR;
+    }
+    AB_ElemCte(ab,&tdaux);
+    printf("dominio raiz: %s.\n",tdaux.domain);
+
+    strcpy(td.domain,"bing");
+    strcpy(td.ip,"180.1.1.1");
+    strcpy(&td.offset,t1);
+    AB_Crear(&(td.subab),tdato);
+
+    AB_Insertar(&ab,IZQ,&td,&error);
+    if(error==RES_ERROR) {
+        printf("No insertó la IZQ.\n");
+        return RES_ERROR;
+    }
+    AB_MoverCte(&ab,IZQ,&error);
+    AB_ElemCte(ab,&tdaux);
+    printf("dominio izquierda: %s.\n",tdaux.domain);
+
+    strcpy(td.domain,"yahoo");
+    strcpy(td.ip,"1.1.1.1");
+    strcpy(&td.offset,t2);
+    AB_Crear(&(td.subab),tdato);
+
+    AB_Insertar(&ab,DER,&td,&error);
+    if(error==RES_ERROR) {
+        printf("No insertó la IZQ.\n");
+        return RES_ERROR;
+    }
+
+    AB_MoverCte(&ab,DER,&error);
+    AB_ElemCte(ab,&tdaux);
+    printf("dominio derecha: %s.\n",tdaux.domain);
+
+    printf("Se insertaron en el arbol.\n");
+
+    printf("Ahora busco dentro del arbol alguna hoja en particular.\n");
+
+    strcpy(domain,d);
+    printf("Voy a buscar: %s.\n",domain);
+    if(findDomain(&ab,RAIZ,domain)==RES_OK) {
+        printf("Encontré lo q buscaba.\n");
+        return RES_OK;
+    }
+    printf("No encontré lo que buscaba.\n");
+    return RES_ERROR;
+}
