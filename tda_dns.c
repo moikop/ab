@@ -1,10 +1,26 @@
 #include "tda_dns.h"
 #include "ab.h"
-#include "pila.h"
 
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+
+#define ARGS_DNS_SEND 6
+#define ARGS_DNS_GET_IP 5
+#define ARGS_DNS_ADD_DOMAIN 5
+#define ARGS_DNS_DELETE_DOMAIN 4
+#define DOMAIN_NAME_MAX 256
+#define DOMAIN_TAG_MAX 64
+#define IP_MAX 16
+#define DASH "-"
+#define DOT "."
+#define MAX_LINE 300
+#define FOUNDED 256
+#define NOT_FOUNDED 255
+#define NO_DATA 254
+#define RES_OK 0
+#define RES_ERROR 1
+#define RES_MEM_ERROR -1
 
 /******************************************** Implementacion de primitivas **********************************************/
 
@@ -39,7 +55,7 @@ void getValue(tdns* dns, char* url, tdomain* td){
     tdomain Aux;
 
     if(AB_Vacio(dns->ab))
-        return;
+        return NO_DATA;
 
     breakDomain(url,&pila);
     if(getData(dns->ab,&pila,domain,RAIZ,td)!=RES_OK) {
@@ -51,7 +67,7 @@ void getValue(tdns* dns, char* url, tdomain* td){
 int urlExists(tdns dns, char* url){
 
     TPila pila;
-    char domain[DOMAIN_TAG_MAX] = "";
+    char* domain[DOMAIN_TAG_MAX] = "";
 
     breakDomain(url,&pila);
     return findDNS(&(dns.ab),&pila,domain,RAIZ);
@@ -75,10 +91,7 @@ void deleteUrl(tdns *dns, char* url) {
 int findDNS(TAB *tree, TPila *url,char* domain, int mov) {
     int res;
     int error;
-    /*
-    TODO: REVISAR!! Por que se define domain dos veces
     char domain[DOMAIN_TAG_MAX];
-    */
     tdomain aux;
 
     if(AB_Vacio(*tree)) return RES_ERROR; /* arbol vacio, no lo encontré*/
@@ -110,10 +123,7 @@ int findDNS(TAB *tree, TPila *url,char* domain, int mov) {
 int getData(TAB *tree, TPila *url,char* domain, int mov,tdomain* td) {
     int res;
     int error;
-    /*
-    TODO: Por que se define domain dos veces
     char domain[DOMAIN_TAG_MAX];
-    */
     tdomain aux;
 
     if(AB_Vacio(*tree)) return RES_ERROR; /* arbol vacio, no lo encontré*/
@@ -147,10 +157,7 @@ int deleteData(TAB* tree,TPila* url,char* domain,int mov) {
 
     int res;
     int error;
-    /*
-    TODO: Por que se define domain dos veces
-    char domain[DOMAIN_TAG_MAX];
-    */
+    /*char domain[DOMAIN_TAG_MAX];*/
     tdomain aux;
     tdomain reemplazo;
 
@@ -185,26 +192,6 @@ int deleteData(TAB* tree,TPila* url,char* domain,int mov) {
     }
 }
 
-
-int orderInsert(TAB *tree, tdomain domain) {
-    int error;
-    tdomain aux;
-    char *buffer = NULL;
-    int search = 0;
-
-    search = findDomain(tree,RAIZ,domain.domain);
-
-    if (!search) {
-        AB_ElemCte(*tree, &aux);
-        if (strcasecmp(domain.domain, aux.domain) > 0)
-            AB_Insertar(tree, DER, &domain, &error);
-        else
-            AB_Insertar(tree, IZQ, &domain, &error);
-        return RES_OK;
-    } else
-        return RES_ERROR;
-}
-
 void breakDomain(char *domain, TPila *pile) {
     char *pointer = NULL;
     char buffer[DOMAIN_TAG_MAX];
@@ -220,21 +207,6 @@ void breakDomain(char *domain, TPila *pile) {
 
 void loadDomain(tdns *dns, TPila *domain) {
     orderInsert(&(dns->ab), domain);
-}
-
-int findDomain(TAB* ab, const int mov, char* domain){
-    int *error;
-    tdomain Aux;
-    AB_MoverCte(ab, mov, error);
-    if(*error==FALSE)
-        return NOT_FOUNDED;
-    AB_ElemCte(*ab,&Aux);
-    if(strcmp(domain,Aux.domain)==0)
-        return FOUNDED;
-    if(AB_CanMove(*ab,DER))
-        return findDomain(ab, DER, domain);
-    if(AB_CanMove(*ab,IZQ))                            /*VER SI ESTA BIEN HACER UNA PRIMITIVA PARA ESTO EN TDA AB*/
-        return findDomain(ab, IZQ, domain);
 }
 
 /* recibe una referencia a un árbol, el dato d, la pila donde está la url, y una variable error*/
@@ -290,4 +262,53 @@ int addSubDomain(TAB* a,tdomain* d,TPila pila,int* error) {
     *error = RES_OK;
     return RES_OK;
 
+}
+
+int findDomain(TAB* ab, const int mov, char* domain){
+    int error;
+    tdomain Aux;
+    int cmp;
+
+    AB_MoverCte(ab, mov, &error);
+
+    if(error==RES_ERROR)
+        return RES_ERROR;
+
+    AB_ElemCte(*ab,&Aux);
+
+    cmp = strcmp(domain,Aux.domain);
+    if(cmp==0) return RES_OK;
+
+    if(cmp<0) return findDomain(ab,IZQ,domain);
+    else return findDomain(ab,DER,domain);
+}
+
+int searchPlace(TAB* ab,tdomain* domain,int* mov) {
+
+    tdomain tdaux;
+    int cmp;
+    int error;
+
+    AB_MoverCte(ab,*mov,&error);
+    if(error==RES_ERROR) return RES_ERROR;
+    AB_ElemCte(*ab,&tdaux);
+    cmp = strcmp(domain->domain,tdaux.domain);
+    if(cmp==0) return RES_OK;
+    if(cmp<0) *mov=IZQ;
+    else *mov=DER;
+    return searchPlace(ab,domain,mov);
+}
+
+int orderInsert(TAB *tree, tdomain domain) {
+    int error;
+    int search = 0;
+    int mov = RAIZ ;
+
+    search = searchPlace(tree,&domain,&mov);
+
+    if(search==RES_OK) return RES_ERROR;
+
+    AB_Insertar(tree,mov,&domain,&error);
+
+    return error;
 }
