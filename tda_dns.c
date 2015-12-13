@@ -1,9 +1,11 @@
 #include "tda_dns.h"
 #include "ab.h"
+#include "pila.h"
 
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <strings.h>
 
 #define ARGS_DNS_SEND 6
 #define ARGS_DNS_GET_IP 5
@@ -35,6 +37,15 @@ void destroyDNS(tdns *dns) {
     free(dns);
 }
 
+/* Declaraciones para evitsr implicit declarations mas abajo */
+
+void breakDomain(char *domain, TPila *pile);
+int addSubDomain(TAB *a, const tdomain *d, TPila pila, int *error);
+int getData(TAB *tree, TPila *url, char *domain, int mov, tdomain *td);
+int findDNS(TAB *tree, TPila *url, char *domain, int mov);
+int deleteData(TAB *tree, TPila *url, char *domain, int mov);
+
+
 /* toma una estructura tdomain completa (elem de la hoja) y la url*/
 /* hace pila con la url, y llama a addSubDomain*/
 int addDomain(tdns* dns,char* url,const tdomain* td) {
@@ -43,7 +54,7 @@ int addDomain(tdns* dns,char* url,const tdomain* td) {
     int error;
 
     breakDomain(url,&pila_dominio); /*acá adentro crea la pila*/
-    addSubDomain(dns->ab,td,pila_dominio,&error);
+    addSubDomain(&(dns->ab),td,pila_dominio,&error);
 
     return error;
 }
@@ -52,22 +63,22 @@ void getValue(tdns* dns, char* url, tdomain* td){
 
     char domain[DOMAIN_TAG_MAX];
     TPila pila;
-    tdomain Aux;
 
     if(AB_Vacio(dns->ab))
-        return NO_DATA;
+        return;
 
     breakDomain(url,&pila);
-    if(getData(dns->ab,&pila,domain,RAIZ,td)!=RES_OK) {
+    if(getData(&(dns->ab),&pila,domain,RAIZ,td)!=RES_OK) {
         printf("No se pudo obtener el dato.\n");
     }
 
 }
 
 int urlExists(tdns dns, char* url){
-
     TPila pila;
-    char* domain[DOMAIN_TAG_MAX] = "";
+    char domain[DOMAIN_TAG_MAX];
+
+    strcpy(domain, "");
 
     breakDomain(url,&pila);
     return findDNS(&(dns.ab),&pila,domain,RAIZ);
@@ -77,10 +88,9 @@ void deleteUrl(tdns *dns, char* url) {
 
     char domain[DOMAIN_TAG_MAX];
     TPila pila;
-    tdomain Aux;
 
     breakDomain(url,&pila);
-    if(deleteData(dns->ab,&pila,domain,RAIZ)!=RES_OK) {
+    if(deleteData(&(dns->ab),&pila,domain,RAIZ)!=RES_OK) {
         printf("No se pudo obtener el dato.\n");
     }
 
@@ -91,8 +101,12 @@ void deleteUrl(tdns *dns, char* url) {
 int findDNS(TAB *tree, TPila *url,char* domain, int mov) {
     int res;
     int error;
-    char domain[DOMAIN_TAG_MAX];
     tdomain aux;
+
+    /*
+    Ya esta definida como parametro
+    char domain[DOMAIN_TAG_MAX];
+    */
 
     if(AB_Vacio(*tree)) return RES_ERROR; /* arbol vacio, no lo encontré*/
 
@@ -123,8 +137,12 @@ int findDNS(TAB *tree, TPila *url,char* domain, int mov) {
 int getData(TAB *tree, TPila *url,char* domain, int mov,tdomain* td) {
     int res;
     int error;
-    char domain[DOMAIN_TAG_MAX];
     tdomain aux;
+    /*
+    Ya esta definido como parametro
+    char domain[DOMAIN_TAG_MAX];
+    */
+
 
     if(AB_Vacio(*tree)) return RES_ERROR; /* arbol vacio, no lo encontré*/
 
@@ -174,20 +192,20 @@ int deleteData(TAB* tree,TPila* url,char* domain,int mov) {
     res = strcasecmp(aux.domain,domain);
 
     if (res < 0) {
-        return getData(tree,url,domain,DER,td);
+        return getData(tree,url,domain,DER,&aux);
     } else if (res > 0) {
-        return getData(tree,url,domain,IZQ,td);
+        return getData(tree,url,domain,IZQ,&aux);
     } else {
         if (P_Vacia(*url)) {
             strcpy(reemplazo.domain,"");
             strcpy(reemplazo.ip,"");
-            reemplazo.offset = '';
+            reemplazo.offset = 0;
             AB_Vaciar(&(reemplazo.subab));
-            AB_ModifCte(ab,&reemplazo);
+            AB_ModifCte(tree,&reemplazo);
             return RES_OK; /*lo encontramos*/
         } else {
             P_Sacar(url,domain);
-            return getData(&(aux.subab),url,domain,RAIZ,td);
+            return getData(&(aux.subab),url,domain,RAIZ,&aux);
         }
     }
 }
@@ -210,7 +228,7 @@ void loadDomain(tdns *dns, TPila *domain) {
 }
 
 /* recibe una referencia a un árbol, el dato d, la pila donde está la url, y una variable error*/
-int addSubDomain(TAB* a,tdomain* d,TPila pila,int* error) {
+int addSubDomain(TAB* a,const tdomain* d,TPila pila,int* error) {
 
     char subdominio[DOMAIN_TAG_MAX];
     tdomain domain;
@@ -238,7 +256,7 @@ int addSubDomain(TAB* a,tdomain* d,TPila pila,int* error) {
         AB_ElemCte(*a,&domain);
         addSubDomain(&(domain.subab),d,pila,error);
         if(*error!=RES_OK) return *error;
-        AB_ModifCte(a,domain);
+        AB_ModifCte(a,&domain);
         *error = RES_OK;
         return *error;
     }

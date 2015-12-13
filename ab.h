@@ -7,6 +7,7 @@
     #define DER 2
     #define PAD 3
     #define RAIZ 4
+
     #if !defined(RES_ARBOL_VACIO)
         #define RES_ARBOL_VACIO 0
     #endif
@@ -48,6 +49,8 @@
     int AB_BorrarRama(TAB *a);
 
 	int AB_BorrarSubRama(TAB *a, int mov);
+
+	void AB_Copy(void *dst, void *src);
 
 #endif
 

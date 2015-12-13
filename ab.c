@@ -9,13 +9,16 @@ void AB_Crear(TAB *a,int tdato)
     a->cte = NULL;
 }
 
-void AB_Copy(tdomain *dst, tdomain *src) {
-    if (src->domain)
-        strcpy(dst->domain, src->domain);
-    if (src->ip)
-        strcpy(dst->ip, src->ip);
-    if (&(src->subab)!=NULL)
-        memcpy(&(dst->subab),&(src->subab), sizeof(TAB));   
+void AB_Copy(void *dst, void *src) {
+    tdomain *aux_src = (tdomain*)src;
+    tdomain *aux_dst = (tdomain*)dst;
+
+    if (aux_src->domain)
+        strcpy(aux_dst->domain, aux_src->domain);
+    if (aux_src->ip)
+        strcpy(aux_dst->ip, aux_src->ip);
+    if (&(aux_src->subab)!=NULL)
+        memcpy(&(aux_dst->subab),&(aux_src->subab), sizeof(TAB));
 }
 
 void AB_ElemCte(TAB a,void *elem)
