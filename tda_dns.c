@@ -227,45 +227,46 @@ void loadDomain(tdns *dns, TPila *domain) {
     orderInsert(&(dns->ab), domain);
 }
 
+int domainExists(TAB a,char* domain) {
+    return findDomain(&a,RAIZ,domain);
+}
+
 /* recibe una referencia a un árbol, el dato d, la pila donde está la url, y una variable error*/
-int addSubDomain(TAB* a,const tdomain* d,TPila pila,int* error) {
+int addSubDomain(TAB* a,const tdomain* d,TPila pila) {
 
     char subdominio[DOMAIN_TAG_MAX];
     tdomain domain;
     tdomain aux;
+    int inser;
 
     /*me fijo si la pila está vacía, si lo está ya se terminó de cargar el dominio o se generó mal la pila*/
     if(P_Vacia(pila)) {
-        *error = RES_OK;
-        return *error;
+        return RES_OK;
     }
 
     /*saco un elemento de la pila*/
     if(P_Sacar(&pila,subdominio)!=TRUE) {
-        *error = RES_ERROR;
-        return *error;
+        return RES_ERROR;
     };
 
     /* si existe en el arbol actual, tomo el corriente, y sigo la búsqueda del siguiente dominio en el árbol del corriente; luego modifico el árbol actual */
-    if(domainExists(*a,subdominio)==FOUNDED) { /*lo encontró*/
+    if(domainExists(*a,subdominio)==RES_OK) { /*lo encontró*/
         if(P_Vacia(pila)) {
             /*la hoja ya existe*/
-            *error = RES_ERROR;
-            return *error;
+            return RES_ERROR;
         }
         AB_ElemCte(*a,&domain);
-        addSubDomain(&(domain.subab),d,pila,error);
-        if(*error!=RES_OK) return *error;
+        if(addSubDomain(&(domain.subab),d,pila)!=RES_OK) return RES_ERROR;
         AB_ModifCte(a,&domain);
-        *error = RES_OK;
-        return *error;
+        return RES_OK;
     }
     else
     {
     /* si no está en el árbol actual el subdominio, puede ser porque se encuentra en una hoja o porque el subdominio todavía no existe pero no es hoja*/
         if(P_Vacia(pila)){
         /* estoy en una hoja , inserto*/
-            return orderInsert(a,*d);
+            inser = orderInsert(a,*d);
+            return inser;
         }
         else
         {
@@ -273,13 +274,12 @@ int addSubDomain(TAB* a,const tdomain* d,TPila pila,int* error) {
             strcpy(aux.domain,subdominio);
             AB_Crear(&(aux.subab),sizeof(tdomain));
             orderInsert(a,aux);
-            addSubDomain(&(aux.subab),d,pila,error);
-            if(*error!=RES_OK) return *error;
+            AB_ElemCte(*a,&domain);
+            if(addSubDomain(&(domain.subab),d,pila)!=RES_OK) return RES_ERROR;
+            AB_ModifCte(a,&domain);
+            return RES_OK;
         }
     }
-    *error = RES_OK;
-    return RES_OK;
-
 }
 
 int findDomain(TAB* ab, const int mov, char* domain){
