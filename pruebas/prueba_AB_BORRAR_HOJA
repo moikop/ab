@@ -24,7 +24,7 @@ int main(int argc,char**argv)
             AB_Insertar(&ab,IZQ,&i,&e);
     }
 
-    AB_MoverCte(&ab,PAD,&e);
+    AB_MoverCte(&ab,PAD,&e); 
 
     AB_ElemCte(ab,&elem1);
 
