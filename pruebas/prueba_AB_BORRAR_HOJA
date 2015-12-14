@@ -6,48 +6,50 @@
 int main(int argc,char**argv)
 {
     TAB ab;
-    int i=1, *error, elem1, elem2;
-    
+    int i=1, e, elem1, elem2;
+
+    e=0;
+
     AB_Crear(&ab,sizeof(int));
-    
-    AB_Insertar(&ab,RAIZ,i,error);
-    
+
+    AB_Insertar(&ab,RAIZ,&i,&e);
+
     i++;
-    
-    for(i;i<14;i++)                 /*lleno un arbol*/
+
+    for(i;i<14;i++)
     {
         if((i%2)==0)
-            AB_Insertar(&ab,DER,i,error);
+            AB_Insertar(&ab,DER,&i,&e);
         else
-            AB_Insertar(&ab,IZQ,i,error);
+            AB_Insertar(&ab,IZQ,&i,&e);
     }
-    
-    AB_MoverCte(&ab,PAD,error);         /*estoy en la ultima hoja q se inserto*/
-    
+
+    AB_MoverCte(&ab,PAD,&e);
+
     AB_ElemCte(ab,&elem1);
-    
+
     printf("%s%d \n","el padre es ",elem1);
 
-    if(AB_Borrar_Hoja(&ab)==FALSE)      /*no pudo borrar xq no es hoja*/
+    if(AB_Borrar_Hoja(&ab)==FALSE)
         printf("%s\n","por ahora funca");
 
-    if(AB_CanMove(ab,DER)==TRUE)
-        AB_MoverCte(&ab,DER,error);
-    else                                /*si no puede mover a la IZQ y es padre, va a poder mover a DER*/
-        AB_MoverCte(&ab,IZQ,error);
+    if(AB_CanMove(ab,DER))
+        AB_MoverCte(&ab,DER,&e);
+    else
+        AB_MoverCte(&ab,IZQ,&e);
 
-    if(AB_Borrar_Hoja(&ab)==FALSE)      /*si no pudo borrar la hoja*/
+    if(AB_Borrar_Hoja(&ab)==FALSE)
         printf("%s\n","no funco en la hoja");
     else
         AB_ElemCte(ab,&elem2);
 
-    if (elem1==elem2)                   /*aca hay un posible error, podria ser diferente a elem1*/     
+    if (elem1==elem2)
     {
-        printf("%s %d\n","parece q funca, el elem es: ", elem2);
+        printf("%s %d\n","el elem es: ", elem2);
         return TRUE;
     }
 
-    printf("%s %d \n", "el elem es: ", elem2);
+    printf("%s %d \n", "parece q no funciono, el elem es: ", elem2);
 
     return TRUE;
 }
