@@ -269,7 +269,7 @@ int AB_Borrar_Hoja(TAB *a){		/*CREO QUE LOS FREE COMENTADOS ESTAN BIEN, LOS DEJO
 			return TRUE;
 		}
 	}
-	/*free(Hijo);
-	free(Padre);*/
+	free(Hijo);
+	free(Padre);
 	return FALSE;
 }
