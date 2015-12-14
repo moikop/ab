@@ -254,7 +254,7 @@ int AB_Borrar_Hoja(TAB *a){		/*CREO QUE LOS FREE COMENTADOS ESTAN BIEN, LOS DEJO
 	if((a->cte->izq)==NULL && (a->cte->der)==NULL)     /*ver logica*/
 	{
 		Hijo=a->cte;
-		Padre=Buscar_Padre(a->raiz,a->cte);
+		Padre=BuscarPadre(a->raiz,a->cte);
 		if(!Padre)
 			return FALSE;
 		a->cte=Padre;
