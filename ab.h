@@ -48,9 +48,11 @@
 
     int AB_BorrarRama(TAB *a);
 
-	int AB_BorrarSubRama(TAB *a, int mov);
+    int AB_BorrarSubRama(TAB *a, int mov);
 
-	void AB_Copy(void *dst, void *src);
+    void AB_Copy(void *dst, void *src);
+    
+    int AB_Borrar_Hoja(TAB *a);
 
 #endif
 
