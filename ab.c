@@ -226,32 +226,52 @@ int AB_BorrarSubRama(TAB *a, int mov){
 }
 
 
-int AB_Borrar_Hoja(TAB *a){
-	TNodoAB Padre;
-	TNodoAB Hijo=a->cte;
-	if(!(a->cte))
+int AB_Borrar_Hoja(TAB *a){		/*CREO QUE LOS FREE COMENTADOS ESTAN BIEN, LOS DEJO ASI PARA QUE SE FIJEN*/
+	TNodoAB *Padre;
+	TNodoAB *Hijo;
+	if(!(a->cte)) 
 		return FALSE;
-	if((a->cte)==(a->raiz))
+	Hijo=malloc(sizeof(TNodoAB));
+	if(!Hijo)
 	{
+		free(Hijo);
+		return FALSE;
+	}
+	Padre=malloc(sizeof(TNodoAB));
+	if(!Padre)
+	{	
+		free(Hijo);
+		free(Padre);
+		return FALSE;
+	}
+	if(((a->cte)==(a->raiz)) && ((a->cte->der)==NULL && (a->cte->izq)==NULL)) /*si es raiz y no hay nada abajo*/
+	{
+		/*free(a->cte)*/
 		a->raiz=NULL;
 		a->cte=NULL;
 		return TRUE;
 	}
 	if((a->cte->izq)==NULL && (a->cte->der)==NULL)     /*ver logica*/
 	{
+		Hijo=a->cte;
 		Padre=Buscar_Padre(a->raiz,a->cte);
 		if(!Padre)
 			return FALSE;
 		a->cte=Padre;
 		if(a->cte->izq==Hijo)
 		{	
+			/*free(a->cte->izq)*/
 			a->cte->izq==NULL;
 			return TRUE;	
 		}
 		if(a->cte->der==Hijo)
 		{
+			/*free(a->cte->der)*/
 			a->cte->der==NULL;
 			return TRUE;
 		}
+	}
+	/*free(Hijo);
+	free(Padre);*/
 	return FALSE;
 }
