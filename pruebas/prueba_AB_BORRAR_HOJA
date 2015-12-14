@@ -1,0 +1,53 @@
+#include "ab.h"
+#include <stdio.h>
+#include <stdlib.h>
+
+
+int main(int argc,char**argv)
+{
+    TAB ab;
+    int i=1, *error, elem1, elem2;
+    
+    AB_Crear(&ab,sizeof(int));
+    
+    AB_Insertar(&ab,RAIZ,i,error);
+    
+    i++;
+    
+    for(i;i<14;i++)
+    {
+        if((i%2)==0)
+            AB_Insertar(&ab,DER,i,error);
+        else
+            AB_Insertar(&ab,IZQ,i,error);
+    }
+    
+    AB_MoverCte(&ab,PAD,error);
+    
+    AB_ElemCte(ab,&elem1);
+    
+    printf("%s%d \n","el padre es ",elem1);
+
+    if(AB_Borrar_Hoja(&ab)==FALSE)
+        printf("%s\n","por ahora funca");
+
+    if(AB_CanMove(ab,DER))
+        AB_MoverCte(&ab,DER,error);
+    else
+        AB_MoverCte(&ab,IZQ,error);
+
+    if(AB_Borrar_Hoja(&ab)==FALSE)
+        printf("%s\n","no funco en la hoja");
+    else
+        AB_ElemCte(ab,&elem2);
+
+    if (elem1==elem2)
+    {
+        printf("%s %d\n","parece q funca, el elem es: ", elem2);
+        return TRUE;
+    }
+
+    printf("%s %d \n", "parece q no funciono, el elem es: ", elem2);
+
+    return TRUE;
+}
