@@ -68,6 +68,7 @@ void getValue(tdns* dns, char* url, tdomain* td){
         return;
 
     breakDomain(url,&pila);
+    P_Sacar(&pila,domain);
     if(getData(&(dns->ab),&pila,domain,RAIZ,td)!=RES_OK) {
         printf("No se pudo obtener el dato.\n");
     }
@@ -134,27 +135,30 @@ int findDNS(TAB *tree, TPila *url,char* domain, int mov) {
     }
 }
 
+void AB_Copy2(tdomain *dst, tdomain *src) {
+    if (src->domain)
+        strcpy(dst->domain, src->domain);
+    if (src->ip)
+        strcpy(dst->ip, src->ip);
+    if (&(src->subab)!=NULL)
+        memcpy(&(dst->subab),&(src->subab), sizeof(TAB));
+}
+
 int getData(TAB *tree, TPila *url,char* domain, int mov,tdomain* td) {
     int res;
     int error;
     tdomain aux;
-    /*
-    Ya esta definido como parametro
-    char domain[DOMAIN_TAG_MAX];
-    */
-
 
     if(AB_Vacio(*tree)) return RES_ERROR; /* arbol vacio, no lo encontré*/
 
     AB_MoverCte(tree, mov,&error);
-    if(error) return RES_ERROR; /* no lo encontre */
+    if(error!=RES_OK) {
+        return RES_ERROR; /* no lo encontre */
+    }
 
     AB_ElemCte(*tree, &aux);
 
-   if ((!domain) || strcmp(domain, "") == 0 )
-        P_Sacar(url,domain);
-
-    res = strcasecmp(aux.domain,domain);
+    res = strcmp(aux.domain,domain);
 
     if (res < 0) {
         return getData(tree,url,domain,DER,td);
@@ -162,7 +166,7 @@ int getData(TAB *tree, TPila *url,char* domain, int mov,tdomain* td) {
         return getData(tree,url,domain,IZQ,td);
     } else {
         if (P_Vacia(*url)) {
-            AB_Copy(td,&aux);
+            AB_Copy2(td,&aux);
             return RES_OK; /*lo encontramos*/
         } else {
             P_Sacar(url,domain);
