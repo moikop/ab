@@ -1,0 +1,257 @@
+#include <stdio.h>
+#include <string.h>
+#include "ab.h"
+#include "pila.h"
+
+#define RES_OK 0
+#define RES_ERROR 1
+#define RES_MEM_ERROR -1
+#define DOMAIN_TAG_MAX 64
+#define DOT "."
+
+
+typedef struct {
+    char domain[256];
+    char ip[16];
+    TAB subab;
+    char offset;
+}tdomain;
+
+int findDomain(TAB* ab, const int mov, char* domain){
+    int error;
+    tdomain Aux;
+    int cmp;
+
+/*    printf("Entramos en FindDomain.\n");*/
+
+    AB_MoverCte(ab, mov, &error);
+ /*   printf("Muevo el corriente: %i\n",error);*/
+
+    if(error==RES_ERROR)
+        return RES_ERROR;
+
+    AB_ElemCte(*ab,&Aux);
+
+ /*   printf("El actual es: %s.\n",Aux.domain);*/
+
+    cmp = strcmp(domain,Aux.domain);
+    if(cmp==0) return RES_OK;
+
+    if(cmp<0) {
+ /*       printf("Me muevo a la izquierda.\n");*/
+        return findDomain(ab,IZQ,domain);
+    }
+    else {
+ /*       printf("Me muevo a la derecha.\n");*/
+        return findDomain(ab,DER,domain);
+    }
+}
+
+int searchPlace(TAB* ab,tdomain* domain,int* mov) {
+
+    tdomain tdaux;
+    int cmp;
+    int error;
+
+    AB_MoverCte(ab,*mov,&error);
+    if(error==RES_ERROR) return RES_ERROR;
+    AB_ElemCte(*ab,&tdaux);
+    cmp = strcmp(domain->domain,tdaux.domain);
+    if(cmp==0) return RES_OK;
+    if(cmp<0) *mov=IZQ;
+    else *mov=DER;
+    return searchPlace(ab,domain,mov);
+}
+
+int orderInsert(TAB *tree, tdomain domain) {
+    int error;
+    int search = 0;
+    int mov = RAIZ ;
+
+    search = searchPlace(tree,&domain,&mov);
+
+    if(search==RES_OK) {
+        printf("Ya existe en el arbol %s.\n",domain.domain);
+        return RES_ERROR;
+    }
+
+    AB_Insertar(tree,mov,&domain,&error);
+
+    if(error==RES_ERROR) {
+        printf("No pudo insertar ordenado.\n");
+    }
+    else printf("Pudo insertar ordenado.\n");
+
+    return error;
+
+}
+
+void breakDomain(char *domain, TPila *pile) {
+    char *pointer = NULL;
+    char buffer[DOMAIN_TAG_MAX];
+
+    P_Crear(pile, sizeof(char) * DOMAIN_TAG_MAX);
+    pointer = strtok(domain, DOT);
+    while (pointer) {
+        strcpy(buffer, pointer);
+        P_Agregar(pile, buffer);
+        pointer = strtok(NULL, DOT);
+    }
+}
+
+int domainExists(TAB a,char* domain) {
+    return findDomain(&a,RAIZ,domain);
+}
+
+int addSubDomain(TAB* a,const tdomain* d,TPila pila) {
+
+    char subdominio[DOMAIN_TAG_MAX];
+    tdomain domain;
+    tdomain aux;
+
+    /*me fijo si la pila está vacía, si lo está ya se terminó de cargar el dominio o se generó mal la pila*/
+    if(P_Vacia(pila)) {
+        return RES_OK;
+    }
+
+    /*saco un elemento de la pila*/
+    if(P_Sacar(&pila,subdominio)!=TRUE) {
+        return RES_ERROR;
+    };
+
+    /* si existe en el arbol actual, tomo el corriente, y sigo la búsqueda del siguiente dominio en el árbol del corriente; luego modifico el árbol actual */
+    if(domainExists(*a,subdominio)==RES_OK) { /*lo encontró*/
+        if(P_Vacia(pila)) {
+            /*la hoja ya existe*/
+            return RES_ERROR;
+        }
+        AB_ElemCte(*a,&domain);
+        if(addSubDomain(&(domain.subab),d,pila)!=RES_OK) return RES_ERROR;
+        AB_ModifCte(a,&domain);
+        return RES_OK;
+    }
+    else
+    {
+    /* si no está en el árbol actual el subdominio, puede ser porque se encuentra en una hoja o porque el subdominio todavía no existe pero no es hoja*/
+        if(P_Vacia(pila)){
+        /* estoy en una hoja , inserto*/
+            return orderInsert(a,*d);
+        }
+        else
+        {
+        /* todavía estoy entre las ramas*/
+            strcpy(aux.domain,subdominio);
+            AB_Crear(&(aux.subab),sizeof(tdomain));
+            orderInsert(a,aux);
+            AB_ElemCte(*a,&domain);
+            if(addSubDomain(&(domain.subab),d,pila)!=RES_OK) return RES_ERROR;
+            AB_ModifCte(a,&domain);
+            return RES_OK;
+        }
+    }
+}
+
+
+void AB_Copy2(tdomain *dst, tdomain *src) {
+    if (src->domain)
+        strcpy(dst->domain, src->domain);
+    if (src->ip)
+        strcpy(dst->ip, src->ip);
+    if (&(src->subab)!=NULL)
+        memcpy(&(dst->subab),&(src->subab), sizeof(TAB));
+}
+
+int getData(TAB *tree, TPila *url,char* domain, int mov,tdomain* td) {
+    int res;
+    int error;
+    tdomain aux;
+
+    printf("Entré en getData.\n");
+    if(AB_Vacio(*tree)) return RES_ERROR; /* arbol vacio, no lo encontré*/
+
+    AB_MoverCte(tree, mov,&error);
+    if(error!=RES_OK) {
+        printf("No puedo mover el corriente.\n");
+        return RES_ERROR; /* no lo encontre */
+    }
+
+    AB_ElemCte(*tree, &aux);
+    printf("Obtuve este corriente: %s.\n",aux.domain);
+
+    res = strcmp(aux.domain,domain);
+    printf("La comparación dio: %s %s %i\n",aux.domain,domain,res);
+
+    if (res < 0) {
+        printf("Voy a la derecha.\n");
+        return getData(tree,url,domain,DER,td);
+    } else if (res > 0) {
+        printf("Voy a la izquierda.\n");
+        return getData(tree,url,domain,IZQ,td);
+    } else {
+        if (P_Vacia(*url)) {
+            AB_Copy2(td,&aux);
+            printf("Encontré el nodo %s.\n",td->domain);
+            return RES_OK; /*lo encontramos*/
+        } else {
+            P_Sacar(url,domain);
+            printf("Sigo iterando: %s\n",domain);
+            return getData(&(aux.subab),url,domain,RAIZ,td);
+        }
+    }
+}
+
+
+
+
+
+
+int main(int argc, char** argv) {
+
+    TAB ab;
+    tdomain td,td1,tdaux;
+    int tdato = sizeof(tdomain);
+    char to[2] = "a";
+    char to2[2] = "c";
+    char url1[256] = "net.yahoo.google";
+    char url2[256] = "www.google.com.ar";
+    char url[256] = "www.google.com.ar";
+    char dom[64];
+    TPila pila;
+
+    AB_Crear(&ab,tdato);
+
+    strcpy(td.domain,"net");
+    strcpy(td.ip,"180.166.130.111");
+    strcpy(&td.offset,to);
+    AB_Crear(&(td.subab),tdato);
+
+    breakDomain(url1,&pila);
+    if(addSubDomain(&ab,&td,pila)!=RES_OK) {
+        printf("No se pudo insertar url.\n");
+        return RES_ERROR;
+    }
+
+    strcpy(td1.domain,"www");
+    strcpy(td1.ip,"180.0.130.111");
+    strcpy(&td1.offset,to2);
+    AB_Crear(&(td1.subab),tdato);
+
+    breakDomain(url2,&pila);
+    if(addSubDomain(&ab,&td1,pila)!=RES_OK) {
+        printf("No se pudo insertar url.\n");
+        return RES_ERROR;
+    }
+
+    printf("Se insertaron en el arbol.\n");
+
+    breakDomain(url,&pila);
+    P_Sacar(&pila,dom);
+    printf("%s\n",dom);
+    if(getData(&ab,&pila,dom,RAIZ,&tdaux)!=RES_OK) {
+        printf("No se pudo obtener el dato.\n");
+        return RES_ERROR;
+    }
+    printf("Dato obtenido: %s %s %s\n",tdaux.domain,tdaux.ip,&(tdaux.offset));
+
+    return RES_OK;
+}
