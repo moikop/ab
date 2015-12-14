@@ -54,7 +54,7 @@ int addDomain(tdns* dns,char* url,const tdomain* td) {
     int error;
 
     breakDomain(url,&pila_dominio); /*acá adentro crea la pila*/
-    addSubDomain(&(dns->ab),td,pila_dominio);
+    addSubDomain(&(dns->ab),td,pila_dominio,&error);                   /*ACA EL &ERROR NO VA*/
 
     return error;
 }
