@@ -234,14 +234,12 @@ int AB_Borrar_Hoja(TAB *a){		/*CREO QUE LOS FREE COMENTADOS ESTAN BIEN, LOS DEJO
 	Hijo=malloc(sizeof(TNodoAB));
 	if(!Hijo)
 	{
-		free(Hijo);
 		return FALSE;
 	}
 	Padre=malloc(sizeof(TNodoAB));
 	if(!Padre)
 	{	
 		free(Hijo);
-		free(Padre);
 		return FALSE;
 	}
 	if(((a->cte)==(a->raiz)) && ((a->cte->der)==NULL && (a->cte->izq)==NULL)) /*si es raiz y no hay nada abajo*/
