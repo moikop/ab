@@ -224,3 +224,34 @@ int AB_BorrarSubRama(TAB *a, int mov){
 	}
 	return RES_OK;
 }
+
+
+int AB_Borrar_Hoja(TAB *a){
+	TNodoAB Padre;
+	TNodoAB Hijo=a->cte;
+	if(!(a->cte))
+		return FALSE;
+	if((a->cte)==(a->raiz))
+	{
+		a->raiz=NULL;
+		a->cte=NULL;
+		return TRUE;
+	}
+	if((a->cte->izq)==NULL && (a->cte->der)==NULL)     /*ver logica*/
+	{
+		Padre=Buscar_Padre(a->raiz,a->cte);
+		if(!Padre)
+			return FALSE;
+		a->cte=Padre;
+		if(a->cte->izq==Hijo)
+		{	
+			a->cte->izq==NULL;
+			return TRUE;	
+		}
+		if(a->cte->der==Hijo)
+		{
+			a->cte->der==NULL;
+			return TRUE;
+		}
+	return FALSE;
+}
