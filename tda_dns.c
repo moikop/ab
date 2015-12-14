@@ -40,7 +40,7 @@ void destroyDNS(tdns *dns) {
 /* Declaraciones para evitsr implicit declarations mas abajo */
 
 void breakDomain(char *domain, TPila *pile);
-int addSubDomain(TAB *a, const tdomain *d, TPila pila, int *error);
+int addSubDomain(TAB *a, const tdomain *d, TPila pila, int *error);       /*el argumento *error no esta en la declaracion de abajo*/
 int getData(TAB *tree, TPila *url, char *domain, int mov, tdomain *td);
 int findDNS(TAB *tree, TPila *url, char *domain, int mov);
 int deleteData(TAB *tree, TPila *url, char *domain, int mov);
