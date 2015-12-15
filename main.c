@@ -100,18 +100,21 @@ int validateURL(char* url) {
 
 int validateInput(int argc, char** argv, char** cmd) {
 
-    if (strcmp(argv[1], CMD_SEND)==0 && argc==ARGS_DNS_SEND && validateURL(argv[2])==RES_OK && validateURL(argv[3])==RES_OK) {
-        strncpy(*cmd,CMD_SEND,sizeof(CMD_SEND));
-    } else if (strcmp(argv[1],CMD_GETIP)==0 && argc==ARGS_DNS_GET_IP && validateURL(argv[2])==RES_OK && validateURL(argv[3])==RES_OK) {
-        strncpy(*cmd,CMD_GETIP,sizeof(CMD_GETIP));
-    } else if (strcmp(argv[1],CMD_ADDDOMAIN)==0 && argc==ARGS_DNS_ADD_DOMAIN && validateURL(argv[2])==RES_OK && validateIP(argv[3])==RES_OK) {
-        strncpy(*cmd,CMD_ADDDOMAIN,sizeof(CMD_ADDDOMAIN));
-    } else if (strcmp(argv[1],CMD_DELETEDOMAIN)==0 && argc==ARGS_DNS_DELETE_DOMAIN && validateURL(argv[2])==RES_OK) {
-        strncpy(*cmd,CMD_DELETEDOMAIN,sizeof(CMD_DELETEDOMAIN));
-    } else {
-        return RES_ERROR;
+    if (argc > 2) {
+        if (strcmp(argv[1], CMD_SEND)==0 && argc==ARGS_DNS_SEND && validateURL(argv[2])==RES_OK && validateURL(argv[3])==RES_OK) {
+            strncpy(*cmd,CMD_SEND,sizeof(CMD_SEND));
+        } else if (strcmp(argv[1],CMD_GETIP)==0 && argc==ARGS_DNS_GET_IP && validateURL(argv[2])==RES_OK && validateURL(argv[3])==RES_OK) {
+            strncpy(*cmd,CMD_GETIP,sizeof(CMD_GETIP));
+        } else if (strcmp(argv[1],CMD_ADDDOMAIN)==0 && argc==ARGS_DNS_ADD_DOMAIN && validateURL(argv[2])==RES_OK && validateIP(argv[3])==RES_OK) {
+            strncpy(*cmd,CMD_ADDDOMAIN,sizeof(CMD_ADDDOMAIN));
+        } else if (strcmp(argv[1],CMD_DELETEDOMAIN)==0 && argc==ARGS_DNS_DELETE_DOMAIN && validateURL(argv[2])==RES_OK) {
+            strncpy(*cmd,CMD_DELETEDOMAIN,sizeof(CMD_DELETEDOMAIN));
+        } else {
+            return RES_ERROR;
+        }
+        return RES_OK;
     }
-    return RES_OK;
+    return RES_ERROR;
 }
 
 /**************************************************************************************************************************/

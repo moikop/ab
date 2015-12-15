@@ -13,17 +13,21 @@
 #define RES_MEM_ERROR -1
 
 int encryptMsg(char *msg, char offset) {
-    int i;
+    int i, len = 0;
 
-    for (i = 0; i < strlen(msg); i++)
+    len = strlen(msg);
+
+    for (i = 0; i < len; i++)
         msg[i] += offset;
     return RES_OK;
 }
 
 int decryptMsg(char *msg, char offset) {
-    int i;
+    int i, len = 0;
 
-    for (i = 0; i < strlen(msg); i++)
+    len = strlen(msg);
+
+    for (i = 0; i < len; i++)
         msg[i] -= offset;
     return RES_OK;
 }
