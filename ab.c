@@ -229,7 +229,7 @@ int AB_BorrarSubRama(TAB *a, int mov){
 int AB_Borrar_Hoja(TAB *a){		/*CREO QUE LOS FREE COMENTADOS ESTAN BIEN, LOS DEJO ASI PARA QUE SE FIJEN*/
 	TNodoAB *Padre;
 	TNodoAB *Hijo;
-	if(!(a->cte)) 
+	if(!(a->cte))
 		return FALSE;
 	Hijo=malloc(sizeof(TNodoAB));
 	if(!Hijo)
@@ -238,7 +238,7 @@ int AB_Borrar_Hoja(TAB *a){		/*CREO QUE LOS FREE COMENTADOS ESTAN BIEN, LOS DEJO
 	}
 	Padre=malloc(sizeof(TNodoAB));
 	if(!Padre)
-	{	
+	{
 		free(Hijo);
 		return FALSE;
 	}
@@ -257,15 +257,15 @@ int AB_Borrar_Hoja(TAB *a){		/*CREO QUE LOS FREE COMENTADOS ESTAN BIEN, LOS DEJO
 			return FALSE;
 		a->cte=Padre;
 		if(a->cte->izq==Hijo)
-		{	
+		{
 			/*free(a->cte->izq)*/
-			a->cte->izq==NULL;
-			return TRUE;	
+			a->cte->izq = NULL;
+			return TRUE;
 		}
 		if(a->cte->der==Hijo)
 		{
 			/*free(a->cte->der)*/
-			a->cte->der==NULL;
+			a->cte->der = NULL;
 			return TRUE;
 		}
 	}
