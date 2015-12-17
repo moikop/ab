@@ -88,7 +88,6 @@ int urlExists(tdns dns, char* url){
     return findDNS(&(dns.ab),&pila,domain,RAIZ);
 }
 
-
 void deleteUrl(tdns *dns, char* url) {
 
     char domain[DOMAIN_TAG_MAX];
@@ -104,35 +103,21 @@ void deleteUrl(tdns *dns, char* url) {
 /************************************ Funciones utilizadas ************************************************************/
 
 int findDNS(TAB *tree, TPila *url,char* domain, int mov) {
-    int res;
-    int error;
-    tdomain aux;
 
-    if(AB_Vacio(*tree)) return RES_ERROR; /* arbol vacio, no lo encontré*/
+	tdomain tdaux;
 
-    AB_MoverCte(tree, mov,&error);
-    if(error) return RES_ERROR; /* no lo encontre */
-
-    AB_ElemCte(*tree, &aux);
-
-   if ((!domain) || strcmp(domain, "") == 0 )
+    /* si existe en el arbol actual, tomo el corriente, y sigo la búsqueda del siguiente dominio en el árbol del corriente*/
+    if(findDomain(tree,RAIZ,domain)==RES_OK) {
+        if(P_Vacia(*url)) return RES_OK;
+        printf("findDNS: Existe el subdominio = %s.\n",domain);
+        printf("findDNS: como existe este subdominio paso al siguiente nivel del arbol.\n");
+        AB_ElemCte(*tree,&tdaux);
         P_Sacar(url,domain);
-
-    /*res = strcasecmp(aux.domain,domain);*/
-    res = strcmp(aux.domain,domain);
-
-    if (res < 0) {
-        return findDNS(tree,url,domain,DER);
-    } else if (res > 0) {
-        return findDNS(tree,url,domain,IZQ);
-    } else {
-        if (P_Vacia(*url)) {
-            return RES_OK; /*lo encontramos*/
-        } else {
-            P_Sacar(url,domain);
-            return findDNS(&(aux.subab),url,domain,RAIZ);
-        }
-    }
+        printf("findDNS: Siguiente subdominio = %s.\n",domain);
+        return findDNS(&(tdaux.subab),url,domain,RAIZ);
+    } else
+        printf("findDNS: no existe el subdomino, no existe la url.\n");
+    return RES_ERROR;
 }
 
 void tdomainCopy(tdomain *dst, tdomain *src) {
@@ -303,6 +288,7 @@ int addSubDomain(TAB* a,const tdomain* d,TPila pila) {
             printf("addSubDomain: paso al siguiente nivel del arbol.\n");
             if(addSubDomain(&(domain.subab),d,pila)!=RES_OK) return RES_ERROR;
             AB_ModifCte(a,&domain);
+            printf("addSubDomain:el subdominio agregado es %s.\n",d->domain);
             printf("addSubDomain: Actualice correctamente.\n");
             return RES_OK;
         }
