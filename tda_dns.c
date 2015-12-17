@@ -58,7 +58,7 @@ void destroyDNS(tdns *dns) {
 int addDomain(tdns* dns,char* url,const tdomain* td) {
 
     TPila pila_dominio;
-
+    printf("addDomain: inicia la insercion.\n");
     breakDomain(url,&pila_dominio); /*acá adentro crea la pila*/
     return addSubDomain(&(dns->ab),td,pila_dominio);
 }
@@ -107,11 +107,6 @@ int findDNS(TAB *tree, TPila *url,char* domain, int mov) {
     int res;
     int error;
     tdomain aux;
-
-    /*
-    Ya esta definida como parametro
-    char domain[DOMAIN_TAG_MAX];
-    */
 
     if(AB_Vacio(*tree)) return RES_ERROR; /* arbol vacio, no lo encontré*/
 
@@ -233,7 +228,9 @@ void breakDomain(char *domain, TPila *pile) {
 
     P_Crear(pile, sizeof(char) * DOMAIN_TAG_MAX);
     pointer = strtok(domain, DOT);
+    printf("breakDomain: url = %s\n",domain);
     while (pointer) {
+        printf("breakDomain: subdominio = %s\n",pointer);
         strcpy(buffer, pointer);
         P_Agregar(pile, buffer);
         pointer = strtok(NULL, DOT);
@@ -253,51 +250,54 @@ int addSubDomain(TAB* a,const tdomain* d,TPila pila) {
 
     /*me fijo si la pila está vacía, si lo está ya se terminó de cargar el dominio o se generó mal la pila*/
     if(P_Vacia(pila)) {
-        printf("Pila vacia.\n");
+        printf("addSubDomain: Pila vacia.\n");
         return RES_OK;
     }
 
     /*saco un elemento de la pila*/
     if(P_Sacar(&pila,subdominio)!=TRUE) {
-        printf("No se pudo sacar un elemento de la pila.\n");
+        printf("addSubDomain: No se pudo sacar un elemento de la pila.\n");
         return RES_ERROR;
     };
 
     /* si existe en el arbol actual, tomo el corriente, y sigo la búsqueda del siguiente dominio en el árbol del corriente; luego modifico el árbol actual */
     if(domainExists(*a,subdominio)==RES_OK) { /*lo encontró*/
-        printf("Existe el subdominio.\n");
+        printf("addSubDomain: Existe el subdominio.\n");
         if(P_Vacia(pila)) {
+            printf("addSubDomain: ya existe la hoja.\n");
             /*la hoja ya existe*/
             return RES_ERROR;
         }
         AB_ElemCte(*a,&domain);
+        printf("addSubDomain: como existe este subdominio paso al siguiente nivel del arbol.\n");
         if(addSubDomain(&(domain.subab),d,pila)!=RES_OK) return RES_ERROR;
         AB_ModifCte(a,&domain);
         return RES_OK;
     }
     else
     {
-        printf("No existe el subdominio.\n");
+        printf("addSubDomain: No existe el subdominio.\n");
         /* si no está en el árbol actual el subdominio, puede ser porque se encuentra en una hoja o porque el subdominio todavía no existe pero no es hoja*/
         if(P_Vacia(pila)){
             /* estoy en una hoja , inserto*/
             inser = orderInsert(a,*d);
-            printf("Estoy en la hoja, ya insertado: %i.\n",inser);
-            printf("%s\n",d->domain);
+            printf("addSubDomain: Estoy en la hoja, ya insertado: %i.\n",inser);
+            printf("addSubDomain: %s\n",d->domain);
             return inser;
         }
         else
         {
-            printf("Tengo que insertar un nuevo subdominio para seguir.\n");
+            printf("addSubDomain: Tengo que insertar un nuevo subdominio para seguir.\n");
             /* todavía estoy entre las ramas*/
             strcpy(aux.domain,subdominio);
             AB_Crear(&(aux.subab),sizeof(tdomain));
             orderInsert(a,aux);
             AB_ElemCte(*a,&domain);
-            printf("%s\n",domain.domain);
+            printf("addSubDomain: %s\n",domain.domain);
+            printf("addSubDomain: paso al siguiente nivel del arbol.\n");
             if(addSubDomain(&(domain.subab),d,pila)!=RES_OK) return RES_ERROR;
             AB_ModifCte(a,&domain);
-            printf("Actualicé correctamente.\n");
+            printf("addSubDomain: Actualice correctamente.\n");
             return RES_OK;
         }
     }
