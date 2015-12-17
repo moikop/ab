@@ -142,28 +142,50 @@ int validateInput(int argc, char** argv, char* cmd) {
 int loadTree(tdns *dns, char *configFile) {
     FILE *cfile;
     tdomain temp;
-    char* buffer;
     char line[MAX_LINE];
-    char Ipa[IP_MAX];
-    char url[DOMAIN_TAG_MAX];
+    char Ipa[IP_MAX*2];
+    char url[DOMAIN_TAG_MAX*2];
+    char* buffer;
+    char url_aux[DOMAIN_TAG_MAX*2];
     int error;
 
     cfile = fopen(configFile, "r");
-    if(!cfile) return RES_ERROR;
+    if(!cfile) {
+        printf("No se pudo abrir el archivo de configuracion.\n");
+        return RES_ERROR;
+    }
+    printf("loadTree: se pudo abrir el archivo de configuracion.\n");
+    printf("loadTree: empiezo a recorrer el archivo de configuracion.\n");
 
     while(!feof(cfile)) {
         if (fgets(line, MAX_LINE-1, cfile)) {
+            printf("loadTree: tomo una linea.\n");
+
             buffer = strtok(line," ");
-            strncpy(url, buffer, DOMAIN_TAG_MAX);
-            buffer = strtok(NULL,"");
-            strncpy(Ipa, buffer, IP_MAX);
-            if(validateURL(url)!=RES_OK && validateIP(Ipa)!=RES_OK) return RES_ERROR;
-            strcpy(temp.domain,url);
+            printf("loadTree: primer palabra = %s\n",buffer);
+            strcpy(url, buffer);
+            buffer = strtok(NULL," ");
+            printf("loadTree: segunda palabra = %s\n",buffer);
+            strcpy(Ipa, buffer);
+
+            if(validateURL(url)!=RES_OK && validateIP(Ipa)!=RES_OK) {
+                printf("loadTree: par url-ip no validos.\n");
+                printf("loadTree: url = %s, ip = %s\n",url,Ipa);
+                fclose(cfile);
+                return RES_ERROR;
+                /** De aca tiene que eliminar el TDA DNS**/
+            }
+            strcpy(url_aux,url);
+            buffer = strtok(url_aux,DOT);
+            strcpy(temp.domain,buffer);
             strcpy(temp.ip,Ipa);
             temp.offset = genoffset(url);
             AB_Crear(&(temp.subab),sizeof(tdomain));
+            printf("loadTree: url = %s, ip = %s, offset = %c\n",url,Ipa,temp.offset);
+
             error = addDomain(dns,url,&temp);
             if(error!=RES_OK) {
+                printf("loadTree: No se pudo agregar al arbol de DNS.\n");
                 fclose(cfile);
                 return error;
             }
@@ -172,6 +194,7 @@ int loadTree(tdns *dns, char *configFile) {
     fclose(cfile);
     return RES_OK;
 }
+
 
 int processData(tdns* dns,char** argv,char* cmd,FILE* logf) {
 
