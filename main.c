@@ -206,13 +206,13 @@ int processData(tdns* dns,char** argv,char* cmd,FILE* logf) {
 
     if(strcmp(argv[1],CMD_SEND)==0) {
         if(urlExists(*dns,argv[2])!=RES_OK) return RES_ERROR;
-        if(urlExists(*dns,argv[4])!=RES_OK) return RES_ERROR;
+        if(urlExists(*dns,argv[3])!=RES_OK) return RES_ERROR;
         getValue(dns,argv[2],&data);
         strcpy(ip_origen,data.ip);
-        getValue(dns,argv[4],&data);
+        getValue(dns,argv[3],&data);
         strcpy(ip_destino,data.ip);
         encryptMsg(msg,data.offset);
-        log(logf,CMD_SEND,argv[2],ip_origen,argv[3],ip_destino,argv[4],msg);
+        log(logf,CMD_SEND,argv[2],ip_origen,argv[3],ip_destino,argv[3],msg);
         printf("Mensaje encriptado: %s\n",msg);
     }
     else if(strcmp(argv[1],CMD_GETIP)==0) {
