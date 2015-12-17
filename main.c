@@ -69,8 +69,16 @@ int validateURL(char* url) {
     char e[2];
     char ti[2];
 
-    token = strtok(url,DOT);
-    if(!token) return RES_ERROR;
+    char *temp = malloc(strlen(url) + 1);
+    if (!temp) return RES_ERROR;
+
+    strcpy(temp, url);
+
+    token = strtok(temp,DOT);
+    if(!token) {
+        free(temp);
+        return RES_ERROR;
+    }
 
     s[1] = '\0';e[1] = '\0';ti[1] = '\0';
 
@@ -81,20 +89,31 @@ int validateURL(char* url) {
         s[0] = token[0];
         e[0] = token[tag_length-1];
 
-        if(tag_length>DOMAIN_TAG_MAX) return RES_ERROR;
-        if((strcmp(s,DASH)==0)||(strcmp(e,DASH)==0)) return RES_ERROR;
+        if(tag_length>DOMAIN_TAG_MAX) {
+                free(temp);
+                return RES_ERROR;
+        }
+        if((strcmp(s,DASH)==0)||(strcmp(e,DASH)==0)) {
+                free(temp);
+                return RES_ERROR;
+        }
 
         for(i=0;i<tag_length;i++) {
             ti[0] = token[i];
-            if((isalpha((int)ti)!=0)||(isdigit((int)ti)!=0)||(strcmp(ti,DASH)==0))
+            if((isalpha((int)ti)!=0)||(isdigit((int)ti)!=0)||(strcmp(ti,DASH)==0)) {
+                free(temp);
                 return RES_ERROR;
+            }
         }
         token = strtok(NULL,DOT);
     }
 
-    if(length>DOMAIN_NAME_MAX)
+    if(length>DOMAIN_NAME_MAX) {
+        free(temp);
         return RES_ERROR;
+    }
 
+    free(temp);
     return RES_OK;
 }
 
