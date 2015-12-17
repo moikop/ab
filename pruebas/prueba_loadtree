@@ -1,0 +1,203 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+#include "tda_dns.h"
+#include "pila.h"
+#include "logger.h"
+#include "crypto.h"
+#include "ab.h"
+
+
+#define ARGS_DNS_SEND 6
+#define ARGS_DNS_GET_IP 5
+#define ARGS_DNS_ADD_DOMAIN 5
+#define ARGS_DNS_DELETE_DOMAIN 4
+#define CMD_SEND    "-dnsSend"
+#define CMD_GETIP   "-dnsGetIP"
+#define CMD_ADDDOMAIN   "-dnsAddDomain"
+#define CMD_DELETEDOMAIN    "-dnsDeleteDomain"
+
+/******************************************* Funciones de validacion *******************************************************/
+
+int validateOctect(long ip) {
+    if ((ip >= 0) && (ip <= 255))
+        return RES_OK;
+    return RES_ERROR;
+}
+
+int validateIP(char* ip) {
+
+    char* token;
+    char* ptr;
+    long aux;
+    int i = 0;
+
+    token = strtok(ip,DOT);
+    if(!token) return RES_ERROR;
+
+    /*validación de los octetos de la dirección ip*/
+    while(token!=NULL) {
+        i++;
+        aux = strtol(token,&ptr,10);
+        if(validateOctect(aux)!=RES_OK)
+            return RES_ERROR;
+        token = strtok(NULL,DOT);
+    }
+    if(i!=4) return RES_ERROR;
+
+    return RES_OK;
+}
+
+int validateURL(char* url) {
+
+    int i = 0;
+    int length = 0;
+    int tag_length = 0;
+    char* token;
+    char s[2];
+    char e[2];
+    char ti[2];
+    char *url_aux;
+
+    url_aux = (char*)malloc(sizeof(char)*strlen(url)+1);
+    if(!url_aux) return RES_MEM_ERROR;
+    strcpy(url_aux,url);
+
+    token = strtok(url_aux,DOT);
+    if(!token) return RES_ERROR;
+
+    s[1] = '\0';e[1] = '\0';ti[1] = '\0';
+
+    /*validación del dominio*/
+    while(token!=NULL) {
+        tag_length = strlen(token);
+        length += tag_length;
+        s[0] = token[0];
+        e[0] = token[tag_length-1];
+
+        if(tag_length>DOMAIN_TAG_MAX) return RES_ERROR;
+        if((strcmp(s,DASH)==0)||(strcmp(e,DASH)==0)) return RES_ERROR;
+
+        for(i=0;i<tag_length;i++) {
+            ti[0] = token[i];
+            if((isalpha((int)ti)!=0)||(isdigit((int)ti)!=0)||(strcmp(ti,DASH)==0))
+                return RES_ERROR;
+        }
+        token = strtok(NULL,DOT);
+    }
+
+    if(length>DOMAIN_NAME_MAX)
+        return RES_ERROR;
+
+    return RES_OK;
+}
+
+/**************************************************************************************************************************/
+
+/*********************************** Funciones de procesamiento ***********************************************************/
+
+int loadTree(tdns *dns, char *configFile) {
+    FILE *cfile;
+    tdomain temp;
+    char line[MAX_LINE];
+    char Ipa[IP_MAX*2];
+    char url[DOMAIN_TAG_MAX*2];
+    char* buffer;
+    int error;
+
+    cfile = fopen(configFile, "r");
+    if(!cfile) {
+        printf("No se pudo abrir el archivo de configuracion.\n");
+        return RES_ERROR;
+    }
+    printf("loadTree: se pudo abrir el archivo de configuracion.\n");
+    printf("loadTree: empiezo a recorrer el archivo de configuracion.\n");
+
+    while(!feof(cfile)) {
+        if (fgets(line, MAX_LINE-1, cfile)) {
+            printf("loadTree: tomo una linea.\n");
+
+            buffer = strtok(line," ");
+            printf("loadTree: primer palabra = %s\n",buffer);
+            strcpy(url, buffer);
+            buffer = strtok(NULL," ");
+            printf("loadTree: segunda palabra = %s\n",buffer);
+            strcpy(Ipa, buffer);
+
+            if(validateURL(url)!=RES_OK && validateIP(Ipa)!=RES_OK) {
+                printf("loadTree: par url-ip no validos.\n");
+                printf("loadTree: url = %s, ip = %s\n",url,Ipa);
+                fclose(cfile);
+                return RES_ERROR;
+                /** De aca tiene que eliminar el TDA DNS**/
+            }
+            strcpy(temp.domain,url);
+            strcpy(temp.ip,Ipa);
+            temp.offset = genoffset(url);
+            AB_Crear(&(temp.subab),sizeof(tdomain));
+            printf("loadTree: url = %s, ip = %s, offset = %c\n",url,Ipa,temp.offset);
+
+            error = addDomain(dns,url,&temp);
+            if(error!=RES_OK) {
+                printf("loadTree: No se pudo agregar al arbol de DNS.\n");
+                fclose(cfile);
+                return error;
+            }
+        }
+    }
+    fclose(cfile);
+    return RES_OK;
+}
+
+/**************************************************************************************************************************/
+
+int main(int argc, char** argv) {
+    FILE* logf;
+    tdns dns;
+    char file_dns[100] = "dns.txt";
+    char logfile[] = "log.txt";
+    int loaded;
+    int crear;
+    char url_test[DOMAIN_NAME_MAX] = "www.google.com.ar";
+    TPila pila;
+    char domain_test[DOMAIN_TAG_MAX];
+    int found;
+
+    logf = fopen(logfile,"a");
+    if(!logf) {
+        printf("main: No se pudo abrir el archivo de log.\n");
+        return RES_ERROR;
+    }
+    printf("main: Se pudo abrir el archivo de log.\n");
+
+    crear = createDNS(&dns,sizeof(tdomain));
+    if(crear!=RES_OK) {
+        printf("main: Ocurrio un error: %i.\n",crear);
+        return RES_ERROR;
+    }
+    printf("main: Se creo una instancia del TDA DNS: %i.\n",crear);
+
+    loaded = loadTree(&dns,file_dns);
+    if(loaded!=RES_OK) {
+        printf("main: Ocurrio un error: %i.\n",loaded);
+        return loaded;
+    }
+    printf("main: Se cargo la instancia del TDA DNS con los datos del archivo de configuracion: %i.\n",loaded);
+
+    /** recorrer **/
+
+    breakDomain(url_test,&pila);
+    P_Sacar(&pila,domain_test);
+    found = findDNS(&(dns.ab),&pila,domain_test,RAIZ);
+    if(found!=RES_OK) {
+        printf("No encontró a %s en arbol DNS.\n",url_test);
+    } else
+    printf("Encontró a %s en el arbol DNS.\n",url_test);
+
+
+    fclose(logf);
+
+    return RES_OK;
+}
