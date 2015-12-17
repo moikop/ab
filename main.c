@@ -217,10 +217,10 @@ int processData(tdns* dns,char** argv,char* cmd,FILE* logf) {
     }
     else if(strcmp(argv[1],CMD_GETIP)==0) {
         if(urlExists(*dns,argv[2])!=RES_OK) return RES_ERROR;
-        if(urlExists(*dns,argv[4])!=RES_OK) return RES_ERROR;
+        if(urlExists(*dns,argv[3])!=RES_OK) return RES_ERROR;
         getValue(dns,argv[2],&data);
         strcpy(ip_origen,data.ip);
-        getValue(dns,argv[4],&data);
+        getValue(dns,argv[3],&data);
         strcpy(ip_destino,data.ip);
         log(logf,CMD_GETIP,argv[2],ip_origen,argv[3],ip_destino,"","");
         printf("Origen: %s %s\nDestino: %s %s\n",argv[2],ip_origen,argv[3],ip_destino);
