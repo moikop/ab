@@ -225,10 +225,16 @@ int deleteData(TAB* tree,TPila* url,char* domain,int mov) {
 void breakDomain(char *domain, TPila *pile) {
     char *pointer = NULL;
     char buffer[DOMAIN_TAG_MAX];
+    char* url_aux;
+
+    url_aux = (char*)malloc(sizeof(char)*strlen(domain)+1);
+    if(!url_aux) printf("breakDomain: no hay recursos para variable auxiliar.\n");
+
+    strcpy(url_aux,domain);
 
     P_Crear(pile, sizeof(char) * DOMAIN_TAG_MAX);
-    pointer = strtok(domain, DOT);
-    printf("breakDomain: url = %s\n",domain);
+    pointer = strtok(url_aux, DOT);
+    printf("breakDomain: url = %s\n",url_aux);
     while (pointer) {
         printf("breakDomain: subdominio = %s\n",pointer);
         strcpy(buffer, pointer);
