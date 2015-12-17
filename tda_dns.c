@@ -83,11 +83,11 @@ int urlExists(tdns dns, char* url){
     TPila pila;
     char domain[DOMAIN_TAG_MAX];
 
-    strcpy(domain, "");
-
     breakDomain(url,&pila);
+    P_Sacar(&pila,domain);
     return findDNS(&(dns.ab),&pila,domain,RAIZ);
 }
+
 
 void deleteUrl(tdns *dns, char* url) {
 
