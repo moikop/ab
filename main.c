@@ -115,7 +115,7 @@ int validateURL(char* url) {
 
         for(i=0;i<tag_length;i++) {
             ti[0] = token[i];
-            if((isalpha((int)ti)!=0)||(isdigit((int)ti)!=0)||(strcmp(ti,DASH)==0)) {
+            if((!isalpha(ti) && !isdigit(ti)) || (strcmp(ti,DASH)==0)) {
                 free(temp);
                 return RES_ERROR;
             }
@@ -142,7 +142,7 @@ int validateInput(int argc, char** argv, char* cmd) {
         strcpy(cmd,CMD_GETIP);
     } else if (strcmp(argv[1],CMD_ADDDOMAIN)==0 && argc==ARGS_DNS_ADD_DOMAIN && validateURL(argv[2])==RES_OK && validateIP(argv[3])==RES_OK) {
         strcpy(cmd,CMD_ADDDOMAIN);
-    } else if (strcmp(argv[1],CMD_DELETEDOMAIN)==0 && argc==ARGS_DNS_DELETE_DOMAIN) {
+    } else if (strcmp(argv[1],CMD_DELETEDOMAIN)==0 && argc==ARGS_DNS_DELETE_DOMAIN && (validateURL(argv[2]) == RES_OK))  {
         strcpy(cmd,CMD_DELETEDOMAIN);
     } else {
         return RES_ERROR;
