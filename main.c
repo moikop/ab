@@ -259,6 +259,8 @@ int processData(tdns* dns,char** argv,char* cmd,FILE* logf) {
             printf("No existe %s para eliminar.\n",argv[2]);
             return RES_ERROR;
         }
+        getValue(dns,argv[2],&data);
+        strcpy(ip_origen,data.ip);
         deleteUrl(dns,argv[2]);
         log(logf,CMD_DELETEDOMAIN,argv[2],ip_origen,"","","","");
         printf("Se elimino a %s con ip %s.\n",argv[2],ip_origen);
