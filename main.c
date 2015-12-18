@@ -142,7 +142,7 @@ int validateInput(int argc, char** argv, char* cmd) {
         strcpy(cmd,CMD_GETIP);
     } else if (strcmp(argv[1],CMD_ADDDOMAIN)==0 && argc==ARGS_DNS_ADD_DOMAIN && validateURL(argv[2])==RES_OK && validateIP(argv[3])==RES_OK) {
         strcpy(cmd,CMD_ADDDOMAIN);
-    } else if (strcmp(argv[1],CMD_DELETEDOMAIN)==0 && argc==ARGS_DNS_DELETE_DOMAIN && validateURL(argv[2])==RES_OK) {
+    } else if (strcmp(argv[1],CMD_DELETEDOMAIN)==0 && argc==ARGS_DNS_DELETE_DOMAIN) {
         strcpy(cmd,CMD_DELETEDOMAIN);
     } else {
         return RES_ERROR;
@@ -254,7 +254,7 @@ int processData(tdns* dns,char** argv,char* cmd,FILE* logf) {
         log(logf,CMD_ADDDOMAIN,argv[2],argv[3],"","","","");
         printf("Se agrego %s con direccion ip %s.\n",argv[2],argv[3]);
     }
-    else if(strcmp(argv[1],CMD_DELETEDOMAIN)) {
+    else if(strcmp(argv[1],CMD_DELETEDOMAIN) == 0) {
         if(urlExists(*dns,argv[2])!=RES_OK) {
             printf("No existe %s para eliminar.\n",argv[2]);
             return RES_ERROR;
