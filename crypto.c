@@ -32,19 +32,19 @@ int decryptMsg(char *msg, char offset) {
     return RES_OK;
 }
 
-int genoffset(char *domain) {
+char genoffset(char *domain) {
     FILE *crypto;
     char *fpath = NULL;
     char offset = 0;
 
     fpath = malloc(sizeof(char) * (strlen(domain) + strlen(CRYPTO_DIR))+1);
-    if (!fpath) return RES_MEM_ERROR;
+    if (!fpath) return 0;
 
     strcpy(fpath, CRYPTO_DIR);
     strcat(fpath, domain);
 
     crypto = fopen(fpath, "w");
-    if (!crypto) return RES_ERROR;
+    if (!crypto) return 0;
 
     srand(time(NULL));
     offset = (rand() % MAX_OFFSET) + 1;
@@ -52,7 +52,7 @@ int genoffset(char *domain) {
     fclose(crypto);
 
     free(fpath);
-    return RES_OK;
+    return offset;
 }
 
 int getoffset(char *domain,char* offset) {
