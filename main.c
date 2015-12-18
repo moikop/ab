@@ -43,18 +43,33 @@ int validateIP(char* ip) {
     long aux;
     int i = 0;
 
-    token = strtok(ip,DOT);
-    if(!token) return RES_ERROR;
+    char *aux_ip = malloc(sizeof(char) * strlen(ip) + 1);
+
+    if (!aux_ip) return RES_ERROR;
+    strcpy(aux_ip, ip);
+
+    token = strtok(aux_ip,DOT);
+    if(!token) {
+        free(aux_ip);
+        return RES_ERROR;
+    }
 
     /*validación de los octetos de la dirección ip*/
     while(token!=NULL) {
         i++;
         aux = strtol(token,&ptr,10);
-        if(validateOctect(aux)!=RES_OK)
+        if(validateOctect(aux)!=RES_OK) {
+            free(aux_ip);
             return RES_ERROR;
+        }
         token = strtok(NULL,DOT);
     }
-    if(i!=4) return RES_ERROR;
+    if(i!=4) {
+        free(aux_ip);
+        return RES_ERROR;
+    }
+
+    free(aux_ip);
 
     return RES_OK;
 }
