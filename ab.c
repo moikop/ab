@@ -1,6 +1,7 @@
 #include "ab.h"
 #include "tda_dns.h"
 #include <memory.h>
+#include <stdio.h>
 
 void AB_Crear(TAB *a,int tdato)
 {
@@ -225,51 +226,29 @@ int AB_BorrarSubRama(TAB *a, int mov){
 	return RES_OK;
 }
 
+int AB_Borrar_Hoja(TAB *a){
 
-int AB_Borrar_Hoja(TAB *a){		/*CREO QUE LOS FREE COMENTADOS ESTAN BIEN, LOS DEJO ASI PARA QUE SE FIJEN*/
-	TNodoAB *Padre;
-	TNodoAB *Hijo;
-	if(!(a->cte))
-		return FALSE;
-	Hijo=malloc(sizeof(TNodoAB));
-	if(!Hijo)
-	{
-		return FALSE;
-	}
-	Padre=malloc(sizeof(TNodoAB));
-	if(!Padre)
-	{
-		free(Hijo);
-		return FALSE;
-	}
-	if(((a->cte)==(a->raiz)) && ((a->cte->der)==NULL && (a->cte->izq)==NULL)) /*si es raiz y no hay nada abajo*/
-	{
-		/*free(a->cte)*/
-		a->raiz=NULL;
-		a->cte=NULL;
-		return TRUE;
-	}
-	if((a->cte->izq)==NULL && (a->cte->der)==NULL)     /*ver logica*/
-	{
-		Hijo=a->cte;
-		Padre=BuscarPadre(a->raiz,a->cte);
-		if(!Padre)
-			return FALSE;
-		a->cte=Padre;
-		if(a->cte->izq==Hijo)
-		{
-			/*free(a->cte->izq)*/
-			a->cte->izq = NULL;
-			return TRUE;
-		}
-		if(a->cte->der==Hijo)
-		{
-			/*free(a->cte->der)*/
-			a->cte->der = NULL;
-			return TRUE;
-		}
-	}
-	free(Hijo);
-	free(Padre);
-	return FALSE;
+    TNodoAB* Padre;
+    printf("AB_Borrar_Hoja: entre en AB_Borrar_Hoja.\n");
+
+    if(a->raiz==a->cte) {
+        printf("AB_Borrar_Hoja: libero memoria del corriente.\n");
+        free(a->cte->elem);
+        free(a->cte);
+        a->cte = a->raiz;
+    } else {
+        printf("AB_Borrar_Hoja: busco el padre del corriente.\n");
+        Padre = BuscarPadre(a->raiz,a->cte);
+        if(Padre->der==a->cte || Padre->izq==a->cte) {
+            printf("AB_Borrar_Hoja: si el corriente es hijo del padre, vacio la subrama del corriente.\n");
+            VaciarSub(a->cte);
+            a->cte = Padre;
+            Padre->der = NULL;
+            Padre->izq = NULL;
+            return RES_OK;
+        }
+        return RES_ERROR;
+    }
+    return RES_OK;
 }
+
