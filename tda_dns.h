@@ -104,7 +104,7 @@
     dns.
     Postcondiciones: Se eliminó url, y su valor asociado, de dns
     */
-    void deleteUrl(tdns *dns, char* url);
+    void deleteDomain(tdns *dns, char* url);
 
 
 #endif
