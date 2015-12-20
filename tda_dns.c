@@ -23,7 +23,7 @@
 #define RES_OK 0
 #define RES_ERROR 1
 #define RES_MEM_ERROR -1
-
+#define RES_HOJA_BORRADA 200
 
 /******************************* Declaraciones de funciones *****************************************/
 
@@ -39,7 +39,7 @@ int addSubDomain(TAB* a,const tdomain* d,TPila pila);
 int findDomain(TAB* ab, const int mov, char* domain);
 int searchPlace(TAB* ab,tdomain* domain,int* mov);
 int orderInsert(TAB *tree, tdomain domain);
-
+int AB_Borrar_Hoja(TAB *a);
 /******************************************************************************************************/
 
 /******************************************** Implementacion de primitivas **********************************************/
@@ -88,14 +88,16 @@ int urlExists(tdns dns, char* url){
     return findDNS(&(dns.ab),&pila,domain,RAIZ);
 }
 
-void deleteUrl(tdns *dns, char* url) {
+void deleteDomain(tdns *dns, char* url) {
 
     char domain[DOMAIN_TAG_MAX];
     TPila pila;
 
+    printf("deleteDomain: Entré en deleteDomain.\n");
     breakDomain(url,&pila);
+    P_Sacar(&pila,domain);
     if(deleteData(&(dns->ab),&pila,domain,RAIZ)!=RES_OK) {
-        printf("No se pudo obtener el dato.\n");
+        printf("No se pudo borrar el dato.\n");
     }
 
 }
@@ -168,44 +170,58 @@ int getData(TAB *tree, TPila *url,char* domain, int mov,tdomain* td) {
     }
 }
 
+
+
 int deleteData(TAB* tree,TPila* url,char* domain,int mov) {
 
     int res;
     int error;
-    /*char domain[DOMAIN_TAG_MAX];*/
     tdomain aux;
-    tdomain reemplazo;
+
+    printf("deleteData: entre en deleteData\n");
 
     if(AB_Vacio(*tree)) return RES_ERROR; /* arbol vacio, no lo encontré*/
 
     AB_MoverCte(tree, mov,&error);
+    printf("deleteData: muevo el corriente.\n");
     if(error) return RES_ERROR; /* no lo encontre */
 
     AB_ElemCte(*tree, &aux);
-
-   if ((!domain) || strcmp(domain, "") == 0 )
-        P_Sacar(url,domain);
+    printf("deleteData: el elem del corriente.\n");
 
     res = strcasecmp(aux.domain,domain);
 
     if (res < 0) {
-        return getData(tree,url,domain,DER,&aux);
+        printf("deleteData: me muevo para la derecha.\n");
+        return deleteData(tree,url,domain,DER);
     } else if (res > 0) {
-        return getData(tree,url,domain,IZQ,&aux);
+        printf("deleteData: me muevo para la izquierda.\n");
+        return deleteData(tree,url,domain,IZQ);
     } else {
-        if (P_Vacia(*url)) {
-            strcpy(reemplazo.domain,"");
-            strcpy(reemplazo.ip,"");
-            reemplazo.offset = 0;
-            AB_Vaciar(&(reemplazo.subab));
-            AB_ModifCte(tree,&reemplazo);
+        printf("deleteData: encontré un match para el subdominio");
+        if (P_Vacia(*url)) { /** estoy en la hoja que tengo que borrar**/
+            printf("deleteData: la pila esta vacia.\n");
+            if(!AB_Vacio(aux.subab)) {
+                printf("deleteData: el arbol en el elem no esta vacio, entonces no es hoja.\n");
+                return RES_ERROR;
+            }
+            printf("deleteData: el arbol en el elem esta vacio, entonces es hoja.\n");
+            if(AB_Borrar_Hoja(tree)!=RES_OK) {
+                printf("deleteData: no se pudo borar la hoja.\n");
+                return RES_ERROR;
+            }
+            AB_ElemCte(*tree, &aux);
+            printf("deleteData: el corriente es = %s.\n",aux.domain);
+            printf("deleteData: Se borro el dominio.\n");
             return RES_OK; /*lo encontramos*/
         } else {
             P_Sacar(url,domain);
-            return getData(&(aux.subab),url,domain,RAIZ,&aux);
+            printf("deleteData: sigo buscando.\n");
+            return deleteData(&(aux.subab),url,domain,RAIZ);
         }
     }
 }
+
 
 void breakDomain(char *domain, TPila *pile) {
     char *pointer = NULL;
