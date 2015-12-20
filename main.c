@@ -24,10 +24,10 @@ void showHelp(char* name)
 {
     printf("Este programa simula un arbol de dns limitado, y permite simular el envío de mensajes encriptados entre dominios pertenecientes al arbol.\n");
     printf("Uso:\n");
-    printf("Muestra en pantalla el mensaje encriptado:\n %s -dnsSend [urlOrigen] [urlDestino] [mensaje] [archivo.log]",name);
-    printf("Muestra en pantalla los datos de la IP Origen y Destino:\n %s -dnsGetIP [urlOrigen] [urlDestino] [archivo.log]",name);
-    printf("Muestra en pantalla el dominio e IP agregados:\n %s -dnsAddDomain [url] [IP] [archivo.log]",name);
-    printf("Muestra en pantalla el dominio e IP eliminados:\n %s -dnsDeleteDomain [url] [archivo.log]",name);
+    printf("Muestra en pantalla el mensaje encriptado:\n %s -dnsSend [urlOrigen] [urlDestino] [mensaje] [archivo.log]\n",name);
+    printf("Muestra en pantalla los datos de la IP Origen y Destino:\n %s -dnsGetIP [urlOrigen] [urlDestino] [archivo.log]\n",name);
+    printf("Muestra en pantalla el dominio e IP agregados:\n %s -dnsAddDomain [url] [IP] [archivo.log]\n",name);
+    printf("Muestra en pantalla el dominio e IP eliminados:\n %s -dnsDeleteDomain [url] [archivo.log]\n",name);
 }
 
 int validateOctect(long ip) {
@@ -115,7 +115,7 @@ int validateURL(char* url) {
 
         for(i=0;i<tag_length;i++) {
             ti[0] = token[i];
-            if((!isalpha(ti) && !isdigit(ti)) || (strcmp(ti,DASH)==0)) {
+            if((isalpha((int)ti)!=0)||(isdigit((int)ti)!=0)||(strcmp(ti,DASH)==0)) {
                 free(temp);
                 return RES_ERROR;
             }
@@ -142,9 +142,12 @@ int validateInput(int argc, char** argv, char* cmd) {
         strcpy(cmd,CMD_GETIP);
     } else if (strcmp(argv[1],CMD_ADDDOMAIN)==0 && argc==ARGS_DNS_ADD_DOMAIN && validateURL(argv[2])==RES_OK && validateIP(argv[3])==RES_OK) {
         strcpy(cmd,CMD_ADDDOMAIN);
-    } else if (strcmp(argv[1],CMD_DELETEDOMAIN)==0 && argc==ARGS_DNS_DELETE_DOMAIN && (validateURL(argv[2]) == RES_OK))  {
+    } else if (strcmp(argv[1],CMD_DELETEDOMAIN)==0 && argc==ARGS_DNS_DELETE_DOMAIN && validateURL(argv[2])==RES_OK)  {
         strcpy(cmd,CMD_DELETEDOMAIN);
     } else {
+        if(validateURL(argv[2])!=RES_OK) printf("valida mal la url.\n");
+        printf("parratro");
+        printf("%i %s %s %s %s ",argc,argv[0],argv[1],argv[2],argv[3]);
         return RES_ERROR;
     }
     return RES_OK;
@@ -231,6 +234,7 @@ int processData(tdns* dns,char** argv,char* cmd,FILE* logf) {
         printf("Mensaje encriptado: %s\n",msg);
     }
     else if(strcmp(argv[1],CMD_GETIP)==0) {
+            printf("Entré en  getip\n");
         if(urlExists(*dns,argv[2])!=RES_OK) return RES_ERROR;
         if(urlExists(*dns,argv[3])!=RES_OK) return RES_ERROR;
         getValue(dns,argv[2],&data);
@@ -260,8 +264,9 @@ int processData(tdns* dns,char** argv,char* cmd,FILE* logf) {
             return RES_ERROR;
         }
         getValue(dns,argv[2],&data);
+        printf("Dato obtenido: %s %s.\n",data.domain,data.ip);
         strcpy(ip_origen,data.ip);
-        deleteUrl(dns,argv[2]);
+        deleteDomain(dns,argv[2]);
         log(logf,CMD_DELETEDOMAIN,argv[2],ip_origen,"","","","");
         printf("Se elimino a %s con ip %s.\n",argv[2],ip_origen);
     } else {
@@ -289,7 +294,6 @@ int main(int argc, char** argv) {
         showHelp(argv[0]);
         return RES_ERROR;
     }
-
     logf = fopen(logfile,"a");
     if(!logf) {
         printf("No se pudo abrir el archivo de log.\n");
